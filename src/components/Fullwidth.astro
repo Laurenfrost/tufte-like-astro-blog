@@ -1,0 +1,57 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div class:list={["fullwidth", className]}>
+  <slot />
+</div>
+
+<style>
+  .fullwidth {
+    max-width: none;
+    clear: both;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Clear any floats before fullwidth */
+  .fullwidth::before {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .fullwidth :global(figure) {
+    margin: 0;
+  }
+
+  .fullwidth :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .fullwidth :global(figcaption) {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .fullwidth {
+      width: 140%;
+      margin-left: -20%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .fullwidth {
+      width: 155%;
+      margin-left: -5%;
+    }
+  }
+</style>

@@ -1,0 +1,113 @@
+---
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<span class="sidenote-wrapper">
+  <label class="sidenote-number" for={`sn-${id}`} aria-describedby={`sidenote-${id}`}></label>
+  <input type="checkbox" id={`sn-${id}`} class="sidenote-toggle" />
+  <span class="sidenote" id={`sidenote-${id}`} role="note">
+    <slot />
+  </span>
+</span>
+
+<style>
+  .sidenote-wrapper {
+    position: relative;
+  }
+
+  .sidenote-toggle {
+    display: none;
+  }
+
+  .sidenote-number {
+    counter-increment: sidenote-counter;
+  }
+
+  .sidenote-number::after {
+    content: counter(sidenote-counter);
+    font-size: 0.7em;
+    position: relative;
+    top: -0.4em;
+    vertical-align: baseline;
+  }
+
+  .sidenote::before {
+    content: counter(sidenote-counter) ". ";
+    font-size: 0.875rem;
+  }
+
+  /*
+   * Desktop: sidenotes float into right padding area
+   * Article has padding-right that reserves space for sidenotes
+   */
+  @media (min-width: 768px) {
+    .sidenote-number {
+      cursor: default;
+    }
+
+    .sidenote {
+      float: right;
+      clear: right;
+      position: relative;
+      margin-right: -38%;
+      width: 33%;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #555;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .sidenote {
+      margin-right: -42%;
+      width: 36%;
+    }
+  }
+
+  /* Wide screens: fixed values */
+  @media (min-width: 1400px) {
+    .sidenote {
+      margin-right: -420px;
+      width: 380px;
+    }
+  }
+
+  /*
+   * Mobile: sidenotes hidden by default,
+   * shown inline when clicked
+   */
+  @media (max-width: 767px) {
+    .sidenote-number {
+      cursor: pointer;
+      color: #a00;
+    }
+
+    .sidenote-number::after {
+      text-decoration: underline;
+    }
+
+    .sidenote {
+      display: none;
+    }
+
+    .sidenote-toggle:checked + .sidenote {
+      display: block;
+      float: none;
+      clear: both;
+      width: 100%;
+      margin: 0.8rem 0;
+      padding: 0.8rem 1rem;
+      background-color: #f8f8f5;
+      border-left: 3px solid #ccc;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #444;
+    }
+  }
+</style>

@@ -1,0 +1,124 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  math?: boolean;
+  wide?: boolean; // 不保留 sidenote 空间，内容占满全宽
+}
+
+const { title, description = '', math = false, wide = false } = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {math && (
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+        integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+        crossorigin="anonymous"
+      />
+    )}
+  </head>
+  <body>
+    <div class:list={["tufte-container", { wide }]}>
+      <Header currentPath={currentPath} />
+      <main class="tufte-article">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
+</html>
+
+<style>
+  body {
+    overflow-x: hidden;
+  }
+
+  /*
+   * 布局逻辑：
+   * - 全宽 = 页面最大宽度 = Header/Footer 宽度 = 正文 + Sidenote
+   * - Container 定义全宽，Header/Footer 自然填满
+   * - Article 区域通过 padding-right 为 Sidenote 预留空间
+   * - Wide 模式下无 Sidenote，正文扩展到全宽
+   */
+
+  .tufte-container {
+    margin: 0 auto;
+    padding: 0 4%;
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+
+  .tufte-article {
+    /* 默认：为 Sidenote 预留右侧空间 */
+  }
+
+  /* Small screens: 无 sidenote 空间 */
+  @media (max-width: 767px) {
+    .tufte-container {
+      padding: 0 5%;
+      font-size: 1rem;
+    }
+  }
+
+  /* Medium screens */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .tufte-container {
+      max-width: 900px;
+      padding: 0 4%;
+    }
+
+    .tufte-article {
+      padding-right: 35%;
+    }
+
+    .tufte-container.wide .tufte-article {
+      padding-right: 0;
+    }
+  }
+
+  /* Large screens */
+  @media (min-width: 1024px) and (max-width: 1399px) {
+    .tufte-container {
+      max-width: 1000px;
+      padding: 0 4%;
+    }
+
+    .tufte-article {
+      padding-right: 38%;
+    }
+
+    .tufte-container.wide .tufte-article {
+      padding-right: 0;
+    }
+  }
+
+  /* Wide screens: 固定宽度 */
+  @media (min-width: 1400px) {
+    .tufte-container {
+      max-width: 1100px;
+      padding: 0 50px;
+    }
+
+    .tufte-article {
+      padding-right: 400px;
+    }
+
+    .tufte-container.wide .tufte-article {
+      padding-right: 0;
+    }
+  }
+</style>

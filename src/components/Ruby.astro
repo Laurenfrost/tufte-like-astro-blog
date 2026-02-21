@@ -1,0 +1,16 @@
+---
+interface Props {
+  mark: string;
+}
+
+const { mark } = Astro.props;
+---
+<ruby>
+    <slot />
+    <rp>(</rp>
+    <rt>{mark}</rt>
+    <rp>)</rp>
+</ruby>
+
+<style>
+</style>

@@ -1,0 +1,133 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  credit?: string;
+  fullwidth?: boolean;
+}
+
+const { src, alt, caption, credit, fullwidth = false } = Astro.props;
+---
+
+<figure class:list={["tufte-figure", { fullwidth }]}>
+  {(caption || credit) && !fullwidth && (
+    <figcaption class="margin-caption">
+      {caption}<span class="credit">{credit && (caption ? `, ${credit}` : credit)}</span>
+    </figcaption>
+  )}
+  <img src={src} alt={alt} loading="lazy" />
+  {(caption || credit) && fullwidth && (
+    <figcaption class="below-caption">
+      {caption}<span class="credit">{credit && (caption ? `, ${credit}` : credit)}</span>
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .tufte-figure {
+    margin: 2rem 0;
+    padding: 0;
+    position: relative;
+  }
+
+  .tufte-figure img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .tufte-figure .credit {
+    color: #777;
+  }
+
+  /* Margin caption: floats to right margin, aligns with image top */
+  .tufte-figure .margin-caption {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #555;
+  }
+
+  @media (min-width: 768px) {
+    .tufte-figure .margin-caption {
+      float: right;
+      clear: right;
+      margin-right: -38%;
+      width: 33%;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .tufte-figure .margin-caption {
+      margin-right: -42%;
+      width: 36%;
+    }
+  }
+
+  /* Wide screens: fixed values */
+  @media (min-width: 1400px) {
+    .tufte-figure .margin-caption {
+      margin-right: -420px;
+      width: 380px;
+    }
+  }
+
+  /* Mobile: margin caption below image */
+  @media (max-width: 767px) {
+    .tufte-figure .margin-caption {
+      display: block;
+      order: 1;
+      margin-top: 0.5rem;
+    }
+
+    .tufte-figure {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tufte-figure img {
+      order: 0;
+    }
+  }
+
+  /* Below caption: for fullwidth figures */
+  .tufte-figure .below-caption {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #555;
+  }
+
+  /* Fullwidth figure */
+  .tufte-figure.fullwidth {
+    max-width: none;
+    clear: both;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+    display: block;
+  }
+
+  /* Clear any floats before fullwidth */
+  .tufte-figure.fullwidth::before {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  @media (min-width: 768px) {
+    .tufte-figure.fullwidth {
+      width: 140%;
+      margin-left: -20%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .tufte-figure.fullwidth {
+      width: 155%;
+      margin-left: -5%;
+    }
+  }
+</style>

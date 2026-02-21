@@ -1,0 +1,13 @@
+name = "blog-images"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "blog-images"
+
+# Custom domain (configure in Cloudflare dashboard)
+# routes = [
+#   { pattern = "img.yourdomain.com", custom_domain = true }
+# ]

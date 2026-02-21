@@ -1,0 +1,115 @@
+---
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '' } = Astro.props;
+
+const navItems = [
+  { href: '/', label: 'HOME' },
+  { href: '/archive', label: 'ARCHIVE' },
+  { href: '/links', label: 'FRIENDS' },
+  { href: '/about', label: 'ABOUT' },
+];
+---
+
+<header class="site-header">
+  <div class="site-branding">
+    <a class="site-title">Tufte Style Blog</a>
+    <p class="site-description">A modern implementation with Astro and Tailwind CSS 探索清晰、优雅的信息呈现方式</p>
+  </div>
+  <nav class="site-nav">
+    <ul>
+      {navItems.map(item => (
+        <li>
+          <a
+            href={item.href}
+            class:list={[{ active: currentPath === item.href }]}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+<hr class="header-divider" />
+
+<style>
+  .site-header {
+    padding: 2rem 0 1rem;
+  }
+
+  .site-branding {
+    margin-bottom: 1rem;
+  }
+
+  .site-title {
+    font-size: 2.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .site-title:hover {
+    text-decoration: none;
+  }
+
+  .site-description {
+    font-family: var(--font-serif-italic);
+    margin: 0.5rem 0 0;
+    font-size: 1.5rem;
+    color: #555;
+    font-style: italic;
+  }
+
+  .site-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .site-nav a {
+    text-decoration: none;
+    color: #555;
+    font-size: 0.95rem;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .site-nav a:hover {
+    border-bottom-color: #555;
+  }
+
+  .site-nav a.active {
+    color: #111;
+    border-bottom-color: #111;
+  }
+
+  .header-divider {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 0 0 2rem;
+  }
+
+  @media (max-width: 767px) {
+    .site-header {
+      padding: 1.5rem 0 1rem;
+    }
+
+    .site-title {
+      font-size: 1.5rem;
+    }
+
+    .site-nav ul {
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .site-nav a {
+      font-size: 0.9rem;
+    }
+  }
+</style>

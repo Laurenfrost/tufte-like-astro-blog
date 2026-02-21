@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const links = [
+  {
+    name: '示例友链',
+    url: 'https://example.com',
+    description: '这是一个示例友链的描述文字',
+  },
+  // 在这里添加更多友链
+];
+---
+
+<BaseLayout title="友链 - Tufte Style Blog" description="友情链接" wide>
+  <h1>友链</h1>
+  <p class="links-intro">这里是一些我喜欢的网站和朋友们的博客。</p>
+
+  <ul class="links-list">
+    {links.map(link => (
+      <li class="link-item">
+        <a href={link.url} target="_blank" rel="noopener noreferrer" class="link-name">
+          {link.name}
+        </a>
+        {link.description && <p class="link-desc">{link.description}</p>}
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  .links-intro {
+    color: #666;
+    margin-bottom: 2rem;
+  }
+
+  .links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .link-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .link-item:last-child {
+    border-bottom: none;
+  }
+
+  .link-name {
+    font-size: 1.1rem;
+  }
+
+  .link-desc {
+    margin: 0.3rem 0 0;
+    font-size: 0.9rem;
+    color: #666;
+  }
+</style>

@@ -1,0 +1,18 @@
+# Rclone configuration for Cloudflare R2
+# Copy this file to rclone.conf and fill in your credentials
+#
+# To get your credentials:
+# 1. Go to Cloudflare Dashboard > R2
+# 2. Click "Manage R2 API Tokens"
+# 3. Create a new token with read/write permissions
+
+[r2]
+type = s3
+provider = Cloudflare
+access_key_id = YOUR_ACCESS_KEY_ID
+secret_access_key = YOUR_SECRET_ACCESS_KEY
+endpoint = https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+acl = private
+
+# Usage:
+# rclone sync content/assets r2:blog-images --config rclone.conf

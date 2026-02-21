@@ -1,0 +1,94 @@
+---
+interface Props {
+  author?: string;
+  source?: string;
+  url?: string;
+  epigraph?: boolean;
+}
+
+const { author, source, url, epigraph = false } = Astro.props;
+---
+
+<blockquote class:list={["tufte-blockquote", { epigraph }]}>
+  <div class="quote-content">
+    <slot />
+  </div>
+  {(author || source) && (
+    <footer class="quote-footer">
+      {author && <span class="author">{author}</span>}
+      {source && (
+        <>
+          {author && <span class="separator">, </span>}
+          {url ? (
+            <cite><a href={url} target="_blank" rel="noopener noreferrer">{source}</a></cite>
+          ) : (
+            <cite>{source}</cite>
+          )}
+        </>
+      )}
+    </footer>
+  )}
+</blockquote>
+
+<style>
+  .tufte-blockquote {
+    /* 引用专用字体栈: ET Book → EB Garamond → 霞鹜文楷 */
+    font-family: var(--font-serif-quote);
+    margin: 1.5rem 0;
+    padding: 0;
+    border: none;
+    font-style: italic;
+  }
+
+  .tufte-blockquote .quote-content {
+    margin: 0;
+    white-space: pre-line;
+  }
+
+  .tufte-blockquote .quote-content :global(p) {
+    margin: 0 0 0.5rem 0;
+    white-space: pre-line;
+  }
+
+  .tufte-blockquote .quote-content :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .tufte-blockquote .quote-footer {
+    font-size: 0.85rem;
+    font-style: normal;
+    text-align: right;
+    margin-top: 0.5rem;
+    color: #555;
+  }
+
+  .tufte-blockquote .quote-footer::before {
+    content: "— ";
+  }
+
+  .tufte-blockquote .author {
+    font-variant: small-caps;
+    letter-spacing: 0.05em;
+  }
+
+  .tufte-blockquote cite {
+    font-style: italic;
+  }
+
+  .tufte-blockquote cite a {
+    color: inherit;
+  }
+
+  /* Epigraph style: used at the beginning of sections */
+  .tufte-blockquote.epigraph {
+    margin: 3rem auto;
+    padding-left: 0;
+  }
+
+  @media (min-width: 768px) {
+    .tufte-blockquote.epigraph {
+      width: 70%;
+      max-width: 45ch;
+    }
+  }
+</style>

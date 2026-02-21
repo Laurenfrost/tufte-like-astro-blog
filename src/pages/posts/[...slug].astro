@@ -1,0 +1,47 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+const post = await getEntry('posts', slug);
+
+if (!post || post.data.draft) {
+  return Astro.redirect('/404');
+}
+
+const { Content } = await render(post);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description} math={post.data.math}>
+  <header class="mb-12">
+    <h1 class="text-4xl font-normal mt-8 mb-2">{post.data.title}</h1>
+    {post.data.subtitle && (
+      <p class="text-xl text-gray-600 italic mt-1">{post.data.subtitle}</p>
+    )}
+    <p class="text-gray-600 mt-2">
+      <time datetime={post.data.date.toISOString()}>
+        {post.data.date.toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+      </time>
+    </p>
+    {post.data.tags && (
+      <div class="mt-2 flex gap-2">
+        {post.data.tags.map((tag: string) => (
+          <span class="text-sm text-gray-500">#{tag}</span>
+        ))}
+      </div>
+    )}
+  </header>
+
+  <div class="prose prose-lg max-w-none">
+    <Content />
+  </div>
+</BaseLayout>

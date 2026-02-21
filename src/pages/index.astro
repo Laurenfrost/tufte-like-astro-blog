@@ -1,0 +1,106 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = await getCollection('posts', ({ data }) => !data.draft);
+const sortedPosts = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="Tufte Blog" description="A Tufte-style blog with sidenotes" wide>
+  <section>
+    <p>
+      This blog uses the design principles of Edward Tufte, the statistician and artist who developed the style of presenting data in his classic books. The style emphasizes the use of sidenotes, a wide main column, and careful attention to typography.
+    </p>
+    <p>
+      这种设计同样适用于中文排版。通过合理的行高设置和字体选择，中西文混排可以达到和谐统一的视觉效果。
+    </p>
+    <p>
+      さらに日本語も同様に、適切な行間とフォント選択を行うことで、違う言語の混在が美しく調和するデザインを実現できます。
+    </p>
+  </section>
+
+  <section>
+    <h2>Recent Posts</h2>
+    <ul class="post-list">
+      {sortedPosts.map((post) => (
+        <li class="post-item">
+          <a href={`/posts/${post.slug}`} class="post-link">
+            <span class="post-title">{post.data.title}</span>
+            <time class="post-date" datetime={post.data.date.toISOString()}>
+              {post.data.date.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </time>
+          </a>
+          {post.data.description && (
+            <p class="post-description">{post.data.description}</p>
+          )}
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .subtitle {
+    font-size: 1.25rem;
+    font-style: italic;
+    color: #666;
+    margin-bottom: 2rem;
+  }
+
+  section {
+    margin-bottom: 3rem;
+  }
+
+  section p {
+    margin-bottom: 1rem;
+  }
+
+  .post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .post-item {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .post-item:last-child {
+    border-bottom: none;
+  }
+
+  .post-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    text-decoration: none;
+  }
+
+  .post-link:hover .post-title {
+    text-decoration: underline;
+  }
+
+  .post-title {
+    font-size: 1.125rem;
+  }
+
+  .post-date {
+    font-size: 0.875rem;
+    color: #666;
+    flex-shrink: 0;
+  }
+
+  .post-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+</style>

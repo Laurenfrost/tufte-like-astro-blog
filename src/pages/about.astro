@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="关于 - Tufte Style Blog" description="关于我" wide>
+  <h1>关于</h1>
+
+  <section class="about-content">
+    <h2>关于我</h2>
+    <p>
+      这里是关于博主的自我介绍。你可以在这里写一些关于自己的信息，
+      比如你的兴趣爱好、职业背景、或者为什么开始写博客。
+    </p>
+
+    <h2>关于这个博客</h2>
+    <p>
+      这个博客采用 Edward Tufte 的经典排版风格，追求清晰、优雅的信息呈现方式。
+      Tufte 是一位信息设计领域的先驱，他的著作对数据可视化和信息设计产生了深远影响。
+    </p>
+    <p>
+      博客使用 <a href="https://astro.build/">Astro</a> 构建，
+      部署在 <a href="https://pages.cloudflare.com/">Cloudflare Pages</a> 上。
+    </p>
+
+    <h2>联系方式</h2>
+    <ul class="contact-list">
+      <li>Email: your-email@example.com</li>
+      <li>GitHub: <a href="https://github.com/">@username</a></li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-content h2 {
+    margin-top: 2rem;
+  }
+
+  .about-content h2:first-child {
+    margin-top: 1rem;
+  }
+
+  .about-content p {
+    margin: 0.75rem 0;
+  }
+
+  .contact-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .contact-list li {
+    padding: 0.3rem 0;
+  }
+</style>

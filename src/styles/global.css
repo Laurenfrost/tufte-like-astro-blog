@@ -1,0 +1,278 @@
+@import "tailwindcss";
+
+/* ============================================
+   ET Book Font Family
+   - Old-style figures for body text (traditional look)
+   - Line figures available for tabular data
+   ============================================ */
+
+/* ET Book Roman - Old Style Figures (正文) */
+@font-face {
+  font-family: "ET Book";
+  src: url("/fonts/et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.woff") format("woff"),
+       url("/fonts/et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ET Book Display Italic - Old Style Figures (斜体) */
+@font-face {
+  font-family: "ET Book";
+  src: url("/fonts/et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff") format("woff"),
+       url("/fonts/et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ET Book Semi Bold - Old Style Figures (半粗体) */
+@font-face {
+  font-family: "ET Book";
+  src: url("/fonts/et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff") format("woff"),
+       url("/fonts/et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ET Book Bold - Line Figures (粗体) */
+@font-face {
+  font-family: "ET Book";
+  src: url("/fonts/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff") format("woff"),
+       url("/fonts/et-book/et-book-bold-line-figures/et-book-bold-line-figures.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ET Book Roman - Line Figures (等高数字，用于表格等) */
+@font-face {
+  font-family: "ET Book Lining";
+  src: url("/fonts/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff") format("woff"),
+       url("/fonts/et-book/et-book-roman-line-figures/et-book-roman-line-figures.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================
+   EB Garamond - Variable Fonts
+   - Fallback for extended Latin characters
+   ============================================ */
+
+/* EB Garamond Variable - Regular */
+@font-face {
+  font-family: "EB Garamond";
+  src: url("/fonts/EB_Garamond/EBGaramond-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* EB Garamond Variable - Italic */
+@font-face {
+  font-family: "EB Garamond";
+  src: url("/fonts/EB_Garamond/EBGaramond-Italic-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================
+   霞鹜 (Lxgw) CJK Font Family
+   ============================================ */
+
+/* 霞鹜新致宋 - 正文 CJK */
+@font-face {
+  font-family: "LXGWNeoZhiSong";
+  src: url("/fonts/Lxgw/LxgwNeoZhiSong/LXGWNeoZhiSong.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 霞鹜文楷 - 引用 CJK */
+@font-face {
+  font-family: "LXGWWenKai";
+  src: url("/fonts/Lxgw/LxgwWenKai/LXGWWenKai-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 霞鹜心致宋 - 斜体 CJK */
+@font-face {
+  font-family: "LXGWHeartSerifCL";
+  src: url("/fonts/Lxgw/LxgwHeartSerif/LXGWHeartSerifCL.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@plugin "@tailwindcss/typography";
+
+/* Tufte Theme Configuration */
+@theme {
+  /* Colors - Tufte CSS canonical palette */
+  --color-tufte-bg: #fffff8;
+  --color-tufte-text: #111;
+
+  /* Font families */
+  /* 正文: ET Book → EB Garamond (fallback for extended Latin) → 霞鹜新致宋 */
+  --font-serif: "ET Book", "EB Garamond", "LXGWNeoZhiSong", serif;
+  /* 斜体: ET Book Italic → EB Garamond Italic → 霞鹜心致宋 */
+  --font-serif-italic: "ET Book", "EB Garamond", "LXGWHeartSerifCL", serif;
+  /* 引用: ET Book → EB Garamond → 霞鹜文楷 */
+  --font-serif-quote: "ET Book", "EB Garamond", "LXGWWenKai", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Base styles */
+html {
+  background-color: var(--color-tufte-bg);
+  color: var(--color-tufte-text);
+}
+
+body {
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 斜体文本使用专用字体栈 (ET Book Italic → EB Garamond Italic → 霞鹜心致宋) */
+em, i, .italic {
+  font-family: var(--font-serif-italic);
+  font-style: italic;
+}
+
+/* CJK typography optimizations */
+:lang(zh), :lang(ja), :lang(ko) {
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* Links - Tufte style: same color, underline only */
+a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Sidenote counter */
+main {
+  counter-reset: sidenote-counter;
+}
+
+/* Tufte-style headings */
+h1, h2, h3 {
+  font-weight: 400;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-family: var(--font-serif-italic);
+  font-style: italic;
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+h3 {
+  font-family: var(--font-serif-italic);
+  font-style: italic;
+  font-size: 1.25rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Blockquotes - Tufte style (ET Book → EB Garamond → 霞鹜文楷) */
+blockquote {
+  font-family: var(--font-serif-quote);
+  font-size: 1.2rem;
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid #ccc;
+}
+
+blockquote footer {
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+/* Code blocks */
+pre {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  padding: 0.5rem;
+  overflow-x: auto;
+  background-color: #f6f8fa !important;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  counter-reset: line;
+}
+
+/* Line numbers */
+pre code {
+  counter-reset: line;
+}
+
+pre code > .line {
+  display: inline-block;
+  width: 100%;
+}
+
+pre code > .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1.5rem;
+  margin-right: 0.75rem;
+  text-align: right;
+  color: #999;
+  font-size: 0.85em;
+}
+
+/* Highlighted lines */
+pre code > .line.highlighted {
+  background-color: rgba(255, 220, 100, 0.3);
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: inline-block;
+  width: calc(100% + 2rem);
+}
+
+code {
+  font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.8em;
+}
+
+/* Inline code - Tufte style: minimal, no background, no backticks */
+:not(pre) > code {
+  font-weight: normal;
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.75em;
+  color: #d73a49;
+}
+
+:not(pre) > code::before,
+:not(pre) > code::after {
+  content: none !important;
+}
+
+/* KaTeX - scale down to match ET Book */
+.katex {
+  font-size: 1em !important;
+}

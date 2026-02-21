@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('posts', ({ data }) => !data.draft);
+
+// Group posts by year
+const postsByYear = posts
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .reduce((acc, post) => {
+    const year = post.data.date.getFullYear();
+    if (!acc[year]) acc[year] = [];
+    acc[year].push(post);
+    return acc;
+  }, {} as Record<number, typeof posts>);
+
+const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
+---
+
+<BaseLayout title="归档 - Tufte Style Blog" description="所有文章归档" wide>
+  <h1>归档</h1>
+  <p class="archive-count">共 {posts.length} 篇文章</p>
+
+  {years.map(year => (
+    <section class="archive-year">
+      <h2>{year}</h2>
+      <ul class="archive-list">
+        {postsByYear[Number(year)].map(post => (
+          <li>
+            <time datetime={post.data.date.toISOString()}>
+              {post.data.date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
+            </time>
+            <a href={`/posts/${post.slug}`}>{post.data.title}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  .archive-count {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+
+  .archive-year h2 {
+    font-size: 1.3rem;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .archive-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .archive-list li {
+    display: flex;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    align-items: baseline;
+  }
+
+  .archive-list time {
+    font-size: 0.85rem;
+    color: #888;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .archive-list a {
+    color: inherit;
+  }
+</style>
