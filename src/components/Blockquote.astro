@@ -31,18 +31,45 @@ const { author, source, url, epigraph = false } = Astro.props;
 </blockquote>
 
 <style>
+  /* 普通引用：缩进，无装饰 */
   .tufte-blockquote {
-    /* 引用专用字体栈: ET Book → EB Garamond → 霞鹜文楷 */
-    font-family: var(--font-serif-quote);
+    font-family: var(--font-serif-quote) !important;
+    font-size: 1rem;
+    line-height: 1.6;
     margin: 1.5rem 0;
+    margin-left: 2rem;
     padding: 0;
     border: none;
+    quotes: none;
+  }
+
+  /* 所有引用都使用斜体 */
+  .tufte-blockquote {
     font-style: italic;
+  }
+
+  .tufte-blockquote .quote-content {
+    font-style: italic;
+  }
+
+  .tufte-blockquote::before,
+  .tufte-blockquote::after {
+    content: none !important;
   }
 
   .tufte-blockquote .quote-content {
     margin: 0;
     white-space: pre-line;
+  }
+
+  .tufte-blockquote .quote-content::before,
+  .tufte-blockquote .quote-content::after {
+    content: none !important;
+  }
+
+  .tufte-blockquote .quote-content :global(p)::before,
+  .tufte-blockquote .quote-content :global(p)::after {
+    content: none !important;
   }
 
   .tufte-blockquote .quote-content :global(p) {
@@ -55,15 +82,16 @@ const { author, source, url, epigraph = false } = Astro.props;
   }
 
   .tufte-blockquote .quote-footer {
+    font-family: var(--font-serif);
     font-size: 0.85rem;
     font-style: normal;
     text-align: right;
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
     color: #555;
   }
 
   .tufte-blockquote .quote-footer::before {
-    content: "— ";
+    content: "\2014\0020";
   }
 
   .tufte-blockquote .author {
@@ -79,16 +107,51 @@ const { author, source, url, epigraph = false } = Astro.props;
     color: inherit;
   }
 
-  /* Epigraph style: used at the beginning of sections */
+  /* Epigraph：居中，带装饰引号 */
   .tufte-blockquote.epigraph {
     margin: 3rem auto;
-    padding-left: 0;
+    margin-left: auto;
+    padding: 0 2rem;
+  }
+
+  .tufte-blockquote.epigraph .quote-content {
+    position: relative;
+    font-style: italic;
+    text-align: left;
+  }
+
+  /* 装饰性引号 - 仅 epigraph */
+  .tufte-blockquote.epigraph .quote-content::before {
+    content: "\201C";
+    font-size: 3rem;
+    font-family: Georgia, serif;
+    color: #ccc;
+    position: absolute;
+    left: -1.5rem;
+    top: -0.5rem;
+    line-height: 1;
+  }
+
+  .tufte-blockquote.epigraph .quote-content::after {
+    content: "\201D";
+    font-size: 3rem;
+    font-family: Georgia, serif;
+    color: #ccc;
+    position: absolute;
+    right: -1.5rem;
+    bottom: -1rem;
+    line-height: 1;
+  }
+
+  .tufte-blockquote.epigraph .quote-footer {
+    text-align: right;
+    margin-top: 1rem;
   }
 
   @media (min-width: 768px) {
     .tufte-blockquote.epigraph {
       width: 70%;
-      max-width: 45ch;
+      max-width: 50ch;
     }
   }
 </style>

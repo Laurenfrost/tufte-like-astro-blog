@@ -196,12 +196,27 @@ h3 {
 }
 
 /* Blockquotes - Tufte style (ET Book → EB Garamond → 霞鹜文楷) */
+/* Markdown 引用默认使用正常字体（非斜体） */
 blockquote {
   font-family: var(--font-serif-quote);
-  font-size: 1.2rem;
+  font-size: 1rem;
+  line-height: 1.6;
   margin: 1.5rem 0;
-  padding-left: 1rem;
-  border-left: 3px solid #ccc;
+  margin-left: 2rem;
+  padding: 0;
+  border: none;
+  font-style: italic;
+  quotes: none;
+}
+
+blockquote::before,
+blockquote::after {
+  content: none !important;
+}
+
+blockquote p::before,
+blockquote p::after {
+  content: none !important;
 }
 
 blockquote footer {

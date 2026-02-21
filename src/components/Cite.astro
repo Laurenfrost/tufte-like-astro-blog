@@ -1,0 +1,32 @@
+---
+/**
+ * Cite - 行内引用组件
+ * 用于引用书名、文章标题或短句
+ * 字体与 Blockquote 一致，但大小和行高跟随正文
+ */
+interface Props {
+  url?: string;
+}
+
+const { url } = Astro.props;
+---
+
+{url ? (
+  <cite class="tufte-cite">
+    <a href={url} target="_blank" rel="noopener noreferrer"><slot /></a>
+  </cite>
+) : (
+  <cite class="tufte-cite"><slot /></cite>
+)}
+
+<style>
+  .tufte-cite {
+    font-family: var(--font-serif-quote);
+    font-style: italic;
+    /* font-size 和 line-height 继承正文 */
+  }
+
+  .tufte-cite a {
+    color: inherit;
+  }
+</style>
