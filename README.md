@@ -19,7 +19,7 @@
 | 框架 | Astro 5.x (SSR) |
 | 部署 | Cloudflare Pages |
 | 样式 | Tailwind CSS 4.x + Typography |
-| 字体 | ET Book + 系统 CJK 字体栈 |
+| 字体 | ET Book + EB Garamond + 霞鹜字体 |
 | 内容 | Content Collections (MDX) |
 | 图片 | Cloudflare R2 + Worker |
 
@@ -245,13 +245,19 @@ IMAGE_BASE_URL=https://img.yourdomain.com
 
 ### 字体
 
-修改 `@theme` 中的字体栈：
+本项目使用以下开源字体：
 
-```css
-@theme {
-  --font-serif: "ET Book", "Noto Serif SC", "Source Han Serif SC", serif;
-}
-```
+| 字体 | 用途 | 许可证 |
+|------|------|--------|
+| [ET Book](https://github.com/edwardtufte/et-book) | 西文正文 | MIT License |
+| [EB Garamond](https://github.com/octaviopardo/EBGaramond12) | 西文 fallback | SIL OFL 1.1 |
+| [霞鹜新致宋](https://github.com/lxgw/LxgwNeoZhiSong) | CJK 正文 | IPA Font License 1.0 |
+| [霞鹜文楷](https://github.com/lxgw/LxgwWenKai) | CJK 引用 | SIL OFL 1.1 |
+| [霞鹜心致宋](https://github.com/lxgw/LxgwHeartSerif) | CJK 斜体 | IPA Font License 1.0 |
+
+所有字体均可免费商用。字体文件位于 `public/fonts/` 目录。
+
+修改 `src/styles/global.css` 中的 `@theme` 部分可自定义字体栈。
 
 ## 许可证
 

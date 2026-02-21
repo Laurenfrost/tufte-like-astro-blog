@@ -212,6 +212,21 @@ public/fonts/
 - Word breaking: `break-word` for mixed CJK/Latin text
 - EB Garamond 作为扩展拉丁字符 (如 ṅ, ā, ū) 的 fallback
 
+**引用样式：**
+
+所有引用统一使用 `--font-serif-quote` 字体栈 + 斜体：
+
+| 样式 | 用途 | 特点 |
+|------|------|------|
+| Markdown `>` | 普通引用 | 斜体，左缩进 2rem |
+| `<Blockquote>` | 带出处的引用 | 斜体，左缩进 2rem，支持 author/source/url |
+| `<Blockquote epigraph>` | 题记引用 | 斜体，居中，装饰性引号，宽度 70% |
+| `<Cite>` | 行内引用 | 斜体，字号/行高继承正文 |
+
+渲染效果：
+- 西文：ET Book Display Italic
+- CJK：霞鹜文楷（楷体风格）
+
 ### Accessibility
 
 - Sidenote references must be focusable with proper `aria-describedby`
