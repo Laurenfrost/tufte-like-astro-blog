@@ -15,9 +15,10 @@ const defaultOptions: RemarkImageAssetsOptions = {
 
 /**
  * Remark plugin that transforms relative image paths in MDX files.
+ * Handles both markdown images and JSX component src props (e.g. Figure, MarginFigure).
  *
- * - Dev mode:  `./hero.jpg` → `/<post-dir>/hero.jpg` (served by Vite middleware)
- * - Build mode: `./hero.jpg` → `https://img.example.com/<post-dir>/hero.jpg`
+ * - Dev mode:  `./hero.jpg` → `/posts/<post-dir>/hero.jpg` (served by Vite middleware)
+ * - Build mode: `./hero.jpg` → `https://img.example.com/posts/<post-dir>/hero.jpg`
  */
 export function remarkImageAssets(options: RemarkImageAssetsOptions = {}) {
   const { baseUrl, mode } = { ...defaultOptions, ...options };
@@ -30,18 +31,37 @@ export function remarkImageAssets(options: RemarkImageAssetsOptions = {}) {
 
     if (!postDir) return;
 
+    const transformSrc = (src: string): string => {
+      // Only transform relative paths starting with ./ or bare filenames
+      if (src.startsWith('./')) {
+        const filename = src.slice(2);
+        return mode === 'dev'
+          ? `/posts/${postDir}/${filename}`
+          : `${baseUrl}/posts/${postDir}/${filename}`;
+      }
+      // Also handle bare relative filenames (e.g. "image-4.png" without ./)
+      if (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) {
+        return mode === 'dev'
+          ? `/posts/${postDir}/${src}`
+          : `${baseUrl}/posts/${postDir}/${src}`;
+      }
+      return src;
+    };
+
+    // Transform markdown images: ![alt](./image.png)
     visit(tree, 'image', (node: Image) => {
-      const src = node.url;
+      node.url = transformSrc(node.url);
+    });
 
-      // Only transform relative paths starting with ./
-      if (!src.startsWith('./')) return;
+    // Transform JSX component src props: <Figure src="./image.png" />
+    visit(tree, ['mdxJsxFlowElement', 'mdxJsxTextElement'], (node: any) => {
+      const attrs = node.attributes;
+      if (!attrs) return;
 
-      const filename = src.slice(2); // strip ./
-
-      if (mode === 'dev') {
-        node.url = `/${postDir}/${filename}`;
-      } else {
-        node.url = `${baseUrl}/${postDir}/${filename}`;
+      for (const attr of attrs) {
+        if (attr.type === 'mdxJsxAttribute' && attr.name === 'src' && typeof attr.value === 'string') {
+          attr.value = transformSrc(attr.value);
+        }
       }
     });
   };

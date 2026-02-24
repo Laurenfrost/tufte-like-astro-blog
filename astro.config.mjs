@@ -31,11 +31,11 @@ function serveContentImagesPlugin() {
         const ext = path.extname(url).toLowerCase();
         if (!imageExtensions.has(ext)) return next();
 
-        // URL pattern: /<post-dir>/<filename>
+        // URL pattern: /posts/<post-dir>/<filename>
         const segments = url.split('/').filter(Boolean);
-        if (segments.length !== 2) return next();
+        if (segments.length !== 3 || segments[0] !== 'posts') return next();
 
-        const [postDir, filename] = segments;
+        const [, postDir, filename] = segments;
         const filePath = path.resolve('content/posts', postDir, filename);
 
         if (!fs.existsSync(filePath)) return next();
@@ -50,7 +50,7 @@ function serveContentImagesPlugin() {
           '.svg': 'image/svg+xml',
         };
 
-        res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
+        res.setHeader('Content-Type', mimeTypes[/** @type {keyof typeof mimeTypes} */ (ext)] || 'application/octet-stream');
         fs.createReadStream(filePath).pipe(res);
       });
     },
