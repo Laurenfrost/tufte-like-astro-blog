@@ -144,21 +144,21 @@ func main() {
 }
 ```
 
-## Figure 图表
+## Figure 图片
 Below we have an example of a regular width figure.
 
 <Figure
   src="https://github.com/edwardtufte/tufte-css/raw/gh-pages/img/exports-imports.png"
-  alt="图片描述 The image title"
-  caption="这是图片的说明文字 This is the image caption"
-  credit="摄影：张三，2024 by Image attribution"
+  alt="普通图片"
+  caption="From Edward Tufte"
+  credit="Visual Display of Quantitative Information, page 92."
 />
 
 <MarginFigure
     id="mf1"
     src="https://edwardtufte.github.io/tufte-css/img/rhino.png"
-    alt="示意图"
-    caption="这是一个在边注区域显示的小图"
+    alt="F.J. Cole, “The History of Albrecht Dürer’s Rhinoceros in Zooological Literature,”"
+    caption="Science, Medicine, and History: Essays on the Evolution of Scientific Thought and Medical Practice (London, 1953)"
 />
 
 But tight integration of graphics with text is central to Tufte's work even when those graphics are ancillary to the main body of a text. In many of those cases, a margin figure may be most appropriate.
@@ -169,6 +169,15 @@ But tight integration of graphics with text is central to Tufte's work even when
     caption="这是图片的说明文字 This is the image caption"
     credit="摄影：张三，2024 by Image attribution"
     fullwidth
+/>
+
+在图片的文件格式上并没有特殊要求，从普通的 png、jpg 到 webp 都可以正常显示。包括 svg 图片也没有问题：
+
+<Figure
+    src="./chart.svg"
+    alt="svg 测试图片"
+    caption="这是一张用于渲染能力演示的 svg 图片"
+    credit="出处我不记得了"
 />
 
 ## Table 表格
