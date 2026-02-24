@@ -2,20 +2,20 @@
 title: "Hello World: Testing Tufte-like Styles"
 subtitle: "A Fancy Subtitle"
 date: 2016-02-20
-description: "这是博客的第一篇文章，用于测试 Tufte 风格的排版效果。"
+description: "这是博客的第一篇文章，用于测试本 Tufte 风格博客的基本排版元素，包括中英文混排、边注、引用、代码块、图片、表格、Ruby 注音等。"
 math: true
 tags: ["测试", "tufte"]
 ---
 
-import Blockquote from '../../components/Blockquote.astro';
-import Cite from '../../components/Cite.astro';
-import Figure from '../../components/Figure.astro';
-import MarginNote from '../../components/MarginNote.astro';
-import MarginFigure from '../../components/MarginFigure.astro';
-import Ruby from '../../components/Ruby.astro';
-import Sidenote from '../../components/Sidenote.astro';
+import Blockquote from '@components/Blockquote.astro';
+import Cite from '@components/Cite.astro';
+import Figure from '@components/Figure.astro';
+import MarginNote from '@components/MarginNote.astro';
+import MarginFigure from '@components/MarginFigure.astro';
+import Ruby from '@components/Ruby.astro';
+import Sidenote from '@components/Sidenote.astro';
 
-这是博客的第一篇文章。本文将展示 Tufte 风格博客的基本排版效果。
+这是博客的第一篇文章。本文将展示的基本排版元素。
 
 ## 中英文混排
 
@@ -31,7 +31,7 @@ Good typography is invisible.<Sidenote id="typography">好的排版是无形的�
     This is an example of an epigraph with some math $ \mathbb N \subseteq \mathbb R $ to start the beginning of a section.
 </Blockquote>
 
-这个博客支持上面这种特殊的“epigraph”引用。当需要为每个大章节点缀一首诗，那么这种样式最合适不过。
+这个博客支持上面这种特殊的"epigraph"引用。当需要为每个大章节点缀一首诗，那么这种样式最合适不过。
 另外博客中也支持行内引用，当正文中的某一句话需要表现出引用的效果，又不想打断整体的阅读体验时，只需要用 `<Cite>` 把要引用的文字框起来就可以了：<Cite>This is between cite tags and has math: $e^x $</Cite>
 
 单独的引用块也可以，只要按照 markdown 的语法 `>` 就可以轻松实现。
@@ -161,7 +161,7 @@ Below we have an example of a regular width figure.
     caption="这是一个在边注区域显示的小图"
 />
 
-But tight integration of graphics with text is central to Tufte’s work even when those graphics are ancillary to the main body of a text. In many of those cases, a margin figure may be most appropriate.
+But tight integration of graphics with text is central to Tufte's work even when those graphics are ancillary to the main body of a text. In many of those cases, a margin figure may be most appropriate.
 
 <Figure
     src="https://edwardtufte.github.io/tufte-css/img/napoleons-march.png"

@@ -12,53 +12,58 @@ A modern blog with Tufte-inspired scientific typography. Core features include s
 | Deployment | Cloudflare Pages |
 | Styling | Tailwind CSS 4.x + `@tailwindcss/typography` |
 | Typography | ET Book + EB Garamond + 霞鹜字体 (CJK) |
-| Content | Astro Content Collections (MDX) |
+| Content | Astro Content Layer API (MDX, glob loader) |
 | Image Storage | Cloudflare R2 + Worker proxy |
-| Sync | Rclone (local assets to R2) |
+| Sync | Rclone (local posts to R2) |
 
 ## Project Structure
 
 ```
 /
+├── content/                       # 内容目录（与 src/ 解耦）
+│   └── posts/                     # 博客文章
+│       ├── hello-world/
+│       │   ├── index.mdx          # 文章正文
+│       │   └── hero.jpg           # 文章图片（与文章同目录）
+│       ├── test-text/
+│       │   └── index.mdx
+│       └── gps-coord/
+│           └── index.mdx
 ├── src/
+│   ├── content.config.ts          # Content Layer API 配置（glob loader）
 │   ├── components/
-│   │   ├── Header.astro          # Site header with navigation
-│   │   ├── Footer.astro          # Site footer with credits
-│   │   ├── Sidenote.astro        # Numbered sidenotes with CSS toggle
-│   │   ├── Marginnote.astro      # Unnumbered margin notes
-│   │   ├── Figure.astro          # Images with caption/credit
-│   │   ├── MarginFigure.astro    # Small images in margin area
-│   │   ├── Blockquote.astro      # Quotes with author/source
-│   │   └── Fullwidth.astro       # Full-width content wrapper
-│   ├── content/
-│   │   ├── config.ts             # Content Collections schema
-│   │   └── posts/                # Blog posts (MDX)
-│   │       └── hello-world.mdx   # Example post with sidenotes
+│   │   ├── Header.astro           # Site header with navigation
+│   │   ├── Footer.astro           # Site footer with credits
+│   │   ├── Sidenote.astro         # Numbered sidenotes with CSS toggle
+│   │   ├── Marginnote.astro       # Unnumbered margin notes
+│   │   ├── Figure.astro           # Images with caption/credit
+│   │   ├── MarginFigure.astro     # Small images in margin area
+│   │   ├── Blockquote.astro       # Quotes with author/source
+│   │   └── Fullwidth.astro        # Full-width content wrapper
 │   ├── layouts/
-│   │   └── BaseLayout.astro      # Tufte-style base layout
+│   │   └── BaseLayout.astro       # Tufte-style base layout
 │   ├── pages/
-│   │   ├── index.astro           # Homepage with post listing (wide mode)
-│   │   ├── archive.astro         # 文章归档页 (wide mode)
-│   │   ├── links.astro           # 友链页 (wide mode)
-│   │   ├── about.astro           # 关于页 (wide mode)
-│   │   └── posts/[...slug].astro # Dynamic post pages (with sidenotes)
+│   │   ├── index.astro            # Homepage with post listing (wide mode)
+│   │   ├── archive.astro          # 文章归档页 (wide mode)
+│   │   ├── links.astro            # 友链页 (wide mode)
+│   │   ├── about.astro            # 关于页 (wide mode)
+│   │   └── posts/[...slug].astro  # Dynamic post pages (with sidenotes)
 │   ├── plugins/
-│   │   └── remark-image-assets.ts # Image path transformation
+│   │   └── remark-image-assets.ts # Image path transformation (dev/build)
 │   └── styles/
-│       └── global.css            # @font-face, @theme, base styles
+│       └── global.css             # @font-face, @theme, base styles
 ├── public/
-│   └── fonts/                    # 字体文件
-│       ├── et-book/              # ET Book 各字形
-│       ├── EB_Garamond/          # EB Garamond 可变字体
-│       └── Lxgw/                 # 霞鹜 CJK 字体
-├── content/
-│   └── assets/                   # Source images (git-ignored)
-├── worker/                       # R2 image proxy Worker
+│   └── fonts/                     # 字体文件
+│       ├── et-book/               # ET Book 各字形
+│       ├── EB_Garamond/           # EB Garamond 可变字体
+│       └── Lxgw/                  # 霞鹜 CJK 字体
+├── worker/                        # R2 image proxy Worker
 │   ├── src/index.ts
 │   ├── wrangler.toml
 │   └── package.json
-├── astro.config.mjs              # Astro + Cloudflare + Remark config
-├── rclone.conf.example           # R2 sync template
+├── astro.config.mjs               # Astro + Cloudflare + Remark + Vite 中间件
+├── tsconfig.json                  # Path aliases (@components/*)
+├── rclone.conf.example            # R2 sync template
 └── package.json
 ```
 
@@ -71,29 +76,79 @@ Using `output: 'server'` with `@astrojs/cloudflare`. This enables:
 - Edge rendering for optimal global performance
 - Direct access to Cloudflare bindings (R2, KV, etc.)
 
-### 2. Content Collections with MDX
+### 2. Content Layer API with Glob Loader
 
-All blog posts use Content Collections for type-safe frontmatter validation.
+使用 Astro 5 Content Layer API (`src/content.config.ts`)，通过 `glob` loader 从 `content/posts/` 加载文章。
 
-**Schema example** (`src/content/config.ts`):
+**核心设计：**
+- 内容目录 `content/` 与代码目录 `src/` 完全解耦
+- 每篇文章一个目录：`content/posts/<slug>/index.mdx`
+- 图片与文章同目录存放，方便写作管理
+- MDX 中通过 `@components/` 路径别名引用组件（tsconfig paths）
+- Content Layer 使用 `post.id` 而非 `post.slug` 标识文章
+
+**Schema** (`src/content.config.ts`):
 ```typescript
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const posts = defineCollection({
-  type: 'content',
+  loader: glob({
+    pattern: '**/index.mdx',
+    base: './content/posts',
+    generateId: ({ entry }) => entry.replace(/\/index\.mdx$/, ''),
+  }),
   schema: z.object({
     title: z.string(),
+    subtitle: z.string().optional(),
     date: z.coerce.date(),
     draft: z.boolean().default(false),
     tags: z.array(z.string()).optional(),
     description: z.string().optional(),
+    math: z.boolean().default(false),
   }),
 });
-
-export const collections = { posts };
 ```
 
-### 3. Tufte Grid System
+**路径别名：**
+MDX 文件位于 `content/` 目录外，通过 tsconfig `@components/*` → `src/components/*` 别名引用组件：
+```mdx
+import Sidenote from '@components/Sidenote.astro';
+```
+
+### 3. Image Pipeline
+
+```
+content/posts/<slug>/hero.jpg      ← 图片与文章同目录
+         │
+         ├─ Dev 模式 ──→ Vite 中间件 ──→ /<slug>/hero.jpg (本地文件)
+         │
+         └─ Build 模式 ─→ Remark 插件 ──→ https://img.example.com/<slug>/hero.jpg
+                              │
+                              ▼ (rclone sync)
+                         R2 Bucket: blog-images/<slug>/hero.jpg
+                              │
+                              ▼ (Worker proxy)
+                         Public URL: https://img.yourdomain.com/<slug>/hero.jpg
+```
+
+**MDX 中引用图片：**
+```mdx
+![alt text](./hero.jpg)
+```
+
+**Remark 插件** (`src/plugins/remark-image-assets.ts`)：
+- 从 `vfile.path` 提取文章目录名（如 `hello-world`）
+- Dev 模式：`./hero.jpg` → `/<slug>/hero.jpg`（由 Vite 中间件从本地读取）
+- Build 模式：`./hero.jpg` → `https://img.example.com/<slug>/hero.jpg`
+
+**Vite 开发中间件** (`astro.config.mjs`)：
+- 仅在 Dev 模式下启用
+- 拦截 `/<slug>/<image>` 请求（匹配已知图片扩展名：jpg/png/gif/webp/avif/svg）
+- 从 `content/posts/<slug>/` 读取文件返回
+- 不干扰页面路由
+
+### 4. Tufte Grid System
 
 **核心设计原则：**
 - 全宽 = 页面最大宽度 = Header/Footer 宽度 = 正文 + Sidenote
@@ -132,20 +187,6 @@ export const collections = { posts };
 - 适用于首页、归档、友链、关于等不需要 sidenote 的页面
 
 Mobile: Single column, sidenotes collapse into expandable inline elements (CSS checkbox toggle).
-
-### 4. Image Pipeline
-
-```
-Local: content/assets/*.jpg
-         │
-         ▼ (rclone sync)
-R2 Bucket: blog-images/
-         │
-         ▼ (Worker proxy)
-Public URL: https://img.yourdomain.com/filename.jpg?w=800
-```
-
-Remark plugin transforms `./assets/image.jpg` → production URL during build.
 
 ## Coding Standards
 
@@ -239,21 +280,35 @@ public/fonts/
 # Install dependencies
 npm install
 
-# Development server
+# Development server (images served from local content/posts/)
 npm run dev
 
-# Production build
+# Production build (images point to CDN)
 npm run build
 
 # Preview production build locally
 npm run preview
 
-# Sync images to R2
-rclone sync content/assets r2:blog-images --config rclone.conf
+# Sync post images to R2 (preserves directory structure)
+rclone sync content/posts r2:blog-images --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" --config rclone.conf
 
 # Deploy Worker
 cd worker && npx wrangler deploy
 ```
+
+## Key Files Reference
+
+When modifying these files, understand their role:
+
+| File | Purpose |
+|------|---------|
+| `astro.config.mjs` | Astro config, Cloudflare adapter, Remark plugins, Vite dev middleware |
+| `src/content.config.ts` | Content Layer API schema + glob loader |
+| `tsconfig.json` | Path aliases (`@components/*` → `src/components/*`) |
+| `src/layouts/BaseLayout.astro` | Master layout with Tufte grid |
+| `src/plugins/remark-image-assets.ts` | Image path transformation (dev: local, build: CDN) |
+| `src/components/Sidenote.astro` | Core interactive component |
+| `worker/src/index.ts` | R2 image proxy logic |
 
 ## Implementation Progress
 
@@ -264,55 +319,30 @@ cd worker && npx wrangler deploy
 - [x] Create BaseLayout with Tufte container styling
 - [x] Configure Content Collections with MDX support
 
-**Key Implementation Notes:**
-- Using `npm` as package manager (not pnpm)
-- ET Book fonts stored in `public/fonts/` (.woff format from hugo-tufte-cjk)
-- Global styles in `src/styles/global.css` with `@theme` CSS variables
-- SSR mode with dynamic routing for posts (`getEntry` instead of `getStaticPaths`)
-
 ### Phase 2: Components - COMPLETED
-- [x] Implement Sidenote.astro (CSS checkbox toggle for mobile)
-- [x] Implement Marginnote.astro (unnumbered margin notes)
-- [x] Implement Fullwidth.astro (full-width content wrapper)
+- [x] Sidenote.astro (CSS checkbox toggle for mobile)
+- [x] Marginnote.astro (unnumbered margin notes)
+- [x] Figure.astro / MarginFigure.astro
+- [x] Blockquote.astro (author/source/url/epigraph)
+- [x] Fullwidth.astro
 - [x] Style prose elements (headings, blockquotes, code)
 
-**Components:**
-- `Sidenote.astro` - 带编号的旁注
-- `Marginnote.astro` - 无编号的边注
-- `Figure.astro` - 图片，支持 caption/credit/fullwidth
-- `MarginFigure.astro` - 边注区域的小图
-- `Blockquote.astro` - 引用，支持 author/source/url/epigraph
-- `Fullwidth.astro` - 全宽内容包装器
-
 ### Phase 3: Image System - COMPLETED
-- [x] Write Remark plugin (`src/plugins/remark-image-assets.ts`)
-- [x] Create Worker proxy with caching (`worker/`)
-- [x] Configure rclone sync template (`rclone.conf.example`)
-
-**Image Path Transformation:**
-- In MDX: `./assets/image.jpg` → `https://img.yourdomain.com/image.jpg`
-- Configure `IMAGE_BASE_URL` env variable in production
-
-**Deployment Steps:**
-1. Create R2 bucket named `blog-images` in Cloudflare dashboard
-2. Copy `rclone.conf.example` to `rclone.conf` and add credentials
-3. Deploy worker: `cd worker && npm install && npm run deploy`
-4. Configure custom domain for worker in Cloudflare dashboard
+- [x] Remark plugin with dev/build dual mode
+- [x] Vite dev middleware for local image serving
+- [x] R2 Worker proxy with caching
+- [x] Rclone sync template
 
 ### Phase 4: Polish - IN PROGRESS
-- [x] Implement post listing on index page
-- [x] Fix responsive layout (sidenotes no longer cause horizontal scroll)
-- [x] Add KaTeX math formula support (conditional loading)
-- [x] Implement Header and Footer components
-- [x] Add navigation pages (archive, links, about)
-- [x] Configure multi-font stack (ET Book + EB Garamond + 霞鹜)
-- [ ] Add RSS feed
+- [x] Post listing on index page
+- [x] Responsive layout fix
+- [x] KaTeX math formula support (conditional loading)
+- [x] Header / Footer components
+- [x] Navigation pages (archive, links, about)
+- [x] Multi-font stack (ET Book + EB Garamond + 霞鹜)
+- [x] Content Layer API migration (content/ 与 src/ 解耦)
+- [ ] RSS feed
 - [ ] Performance optimization (fonts, images)
-
-**Header/Footer:**
-- `Header.astro`: 博客名称、描述、导航菜单 (HOME, ARCHIVE, FRIENDS, ABOUT)
-- `Footer.astro`: Credit 和 Copyright 信息
-- 两者宽度与容器全宽一致
 
 **Math Support:**
 - Enable with `math: true` in frontmatter
@@ -324,19 +354,6 @@ cd worker && npx wrangler deploy
 - 支持行号显示 (CSS counters)
 - 支持行高亮: meta 语法 ` ```js {1,3-5}` 或行内 `// [!code highlight]`
 
-## Key Files Reference
-
-When modifying these files, understand their role:
-
-| File | Purpose |
-|------|---------|
-| `astro.config.mjs` | Astro config, Cloudflare adapter, Remark plugins |
-| `tailwind.config.mjs` | Theme colors, typography customization, font stack |
-| `src/layouts/BaseLayout.astro` | Master layout with Tufte grid |
-| `src/content/config.ts` | Content Collections schema |
-| `src/components/Sidenote.astro` | Core interactive component |
-| `worker/src/index.ts` | R2 image proxy logic |
-
 ## Notes for AI Assistants
 
 - Always read existing files before modification
@@ -344,4 +361,6 @@ When modifying these files, understand their role:
 - Keep solutions minimal; avoid unnecessary abstraction
 - Test responsive behavior for all layout changes
 - Consider CJK text rendering in typography decisions
-- Image paths in MDX should use relative `./assets/` syntax (transformed at build time)
+- Image paths in MDX should use relative `./` syntax (transformed at build time by remark plugin)
+- MDX component imports use `@components/` alias, NOT relative paths
+- Content Layer API uses `post.id` (not `post.slug`) for article identification

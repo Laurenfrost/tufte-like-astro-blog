@@ -30,7 +30,7 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
             <time datetime={post.data.date.toISOString()}>
               {post.data.date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
             </time>
-            <a href={`/posts/${post.slug}`}>{post.data.title}</a>
+            <a href={`/posts/${post.id}`}>{post.data.title}</a>
           </li>
         ))}
       </ul>

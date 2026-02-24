@@ -20,7 +20,7 @@
 | 部署 | Cloudflare Pages |
 | 样式 | Tailwind CSS 4.x + Typography |
 | 字体 | ET Book + EB Garamond + 霞鹜字体 |
-| 内容 | Content Collections (MDX) |
+| 内容 | Astro Content Layer API (MDX) |
 | 图片 | Cloudflare R2 + Worker |
 
 ## 快速开始
@@ -29,10 +29,10 @@
 # 安装依赖
 npm install
 
-# 启动开发服务器
+# 启动开发服务器（图片从本地加载）
 npm run dev
 
-# 构建生产版本
+# 构建生产版本（图片指向 CDN）
 npm run build
 
 # 预览生产构建
@@ -42,32 +42,46 @@ npm run preview
 ## 项目结构
 
 ```
+├── content/                    # 内容目录（与 src/ 解耦）
+│   └── posts/                  # 博客文章
+│       ├── hello-world/
+│       │   ├── index.mdx       # 文章正文
+│       │   └── hero.jpg        # 图片与文章同目录
+│       └── another-post/
+│           └── index.mdx
 ├── src/
-│   ├── components/          # Tufte 风格组件
-│   │   ├── Sidenote.astro   # 带编号的旁注
-│   │   ├── Marginnote.astro # 无编号的边注
-│   │   ├── Figure.astro     # 图片（支持说明和来源）
-│   │   ├── MarginFigure.astro # 边注区域的小图
-│   │   ├── Blockquote.astro # 引用（支持作者和来源）
-│   │   └── Fullwidth.astro  # 全宽内容
-│   ├── content/posts/       # MDX 博客文章
-│   ├── layouts/             # 页面布局
-│   ├── pages/               # 路由页面
-│   ├── plugins/             # Remark 插件
-│   └── styles/              # 全局样式
-├── public/fonts/            # ET Book 字体文件
-├── content/assets/          # 图片素材（git 忽略，rclone 同步）
-├── worker/                  # R2 图片代理 Worker
-└── astro.config.mjs
+│   ├── content.config.ts       # Content Layer API 配置
+│   ├── components/             # Tufte 风格组件
+│   │   ├── Sidenote.astro      # 带编号的旁注
+│   │   ├── Marginnote.astro    # 无编号的边注
+│   │   ├── Figure.astro        # 图片（支持说明和来源）
+│   │   ├── MarginFigure.astro  # 边注区域的小图
+│   │   ├── Blockquote.astro    # 引用（支持作者和来源）
+│   │   └── Fullwidth.astro     # 全宽内容
+│   ├── layouts/                # 页面布局
+│   ├── pages/                  # 路由页面
+│   ├── plugins/                # Remark 插件
+│   └── styles/                 # 全局样式
+├── public/fonts/               # ET Book + EB Garamond + 霞鹜字体
+├── worker/                     # R2 图片代理 Worker
+└── astro.config.mjs            # Astro 配置 + Vite 开发中间件
 ```
 
 ## 写作指南
 
 ### 创建新文章
 
-在 `src/content/posts/` 目录下创建 `.mdx` 文件：
+在 `content/posts/` 下创建以文章 slug 命名的目录，包含 `index.mdx`：
 
-```mdx
+```
+content/posts/my-new-post/
+  index.mdx
+  photo.jpg        # 图片与文章放在一起
+```
+
+**Frontmatter：**
+
+```yaml
 ---
 title: "文章标题"
 subtitle: "可选副标题"
@@ -75,31 +89,65 @@ date: 2024-01-01
 description: "文章描述"
 tags: ["标签1", "标签2"]
 math: true  # 启用数学公式（可选）
+draft: false
 ---
-
-正文内容...
 ```
 
-### 使用旁注
+### 使用组件
+
+MDX 中通过 `@components/` 路径别名引用组件：
 
 ```mdx
-import Sidenote from '../../components/Sidenote.astro';
-import Marginnote from '../../components/Marginnote.astro';
+import Sidenote from '@components/Sidenote.astro';
+import MarginNote from '@components/MarginNote.astro';
 
 这是正文内容。<Sidenote id="sn1">这是带编号的旁注内容。</Sidenote>
 
-这里需要补充说明。<Marginnote id="mn1">这是不带编号的边注。</Marginnote>
+这里需要补充说明。<MarginNote id="mn1">这是不带编号的边注。</MarginNote>
+```
+
+可用组件：`Sidenote`、`MarginNote`、`Figure`、`MarginFigure`、`Blockquote`、`Cite`、`Ruby`、`Fullwidth`。
+
+### 使用图片
+
+图片与文章放在同一目录下，MDX 中使用相对路径引用：
+
+```markdown
+![图片描述](./photo.jpg)
+```
+
+| 模式 | `./photo.jpg` 解析为 | 来源 |
+|------|---------------------|------|
+| Dev  | `/<slug>/photo.jpg` | Vite 中间件从本地文件系统读取 |
+| Build | `https://img.example.com/<slug>/photo.jpg` | Cloudflare R2 via Worker |
+
+**带说明和来源的图片**（Figure 组件）：
+
+```mdx
+import Figure from '@components/Figure.astro';
+
+<Figure
+  src="./photo.jpg"
+  alt="图片描述"
+  caption="这是图片的说明文字"
+  credit="摄影：张三，2024"
+/>
+
+<!-- 全宽图片 -->
+<Figure src="./wide.jpg" alt="宽幅图片" caption="横跨主栏和边注区域" fullwidth />
+```
+
+**边注区域的小图**（MarginFigure 组件）：
+
+```mdx
+import MarginFigure from '@components/MarginFigure.astro';
+
+正文内容。<MarginFigure id="mf1" src="./diagram.jpg" alt="示意图" caption="边注小图" />
 ```
 
 ### 使用数学公式
 
-首先在 frontmatter 中启用数学支持：
-
-```yaml
-math: true
-```
-
-然后使用 LaTeX 语法：
+在 frontmatter 中启用 `math: true`，然后使用 LaTeX 语法：
 
 ```markdown
 行内公式：质能方程 $E = mc^2$ 是物理学的基础。
@@ -111,67 +159,14 @@ $$
 $$
 ```
 
-### 使用图片
-
-**简单图片**（Markdown 语法）：
-
-```markdown
-![图片描述](./assets/image.jpg)
-```
-
-**带说明和来源的图片**（Figure 组件）：
-
-```mdx
-import Figure from '../../components/Figure.astro';
-
-<Figure
-  src="./assets/photo.jpg"
-  alt="图片描述"
-  caption="这是图片的说明文字"
-  credit="摄影：张三，2024"
-/>
-
-<!-- 全宽图片 -->
-<Figure
-  src="./assets/wide-photo.jpg"
-  alt="宽幅图片"
-  caption="这张图片会横跨主栏和边注区域"
-  fullwidth
-/>
-```
-
-**边注区域的小图**（MarginFigure 组件）：
-
-```mdx
-import MarginFigure from '../../components/MarginFigure.astro';
-
-正文内容。<MarginFigure
-  id="mf1"
-  src="./assets/small-diagram.jpg"
-  alt="示意图"
-  caption="这是一个在边注区域显示的小图"
-/>
-```
-
 ### 使用引用
 
-**带作者和来源的引用**（Blockquote 组件）：
-
 ```mdx
-import Blockquote from '../../components/Blockquote.astro';
+import Blockquote from '@components/Blockquote.astro';
 
 <Blockquote author="Edward Tufte" source="The Visual Display of Quantitative Information">
   Excellence in statistical graphics consists of complex ideas communicated
   with clarity, precision, and efficiency.
-</Blockquote>
-
-<!-- 带链接的来源 -->
-<Blockquote
-  author="Albert Einstein"
-  source="Letter to Max Born, 1926"
-  url="https://example.com/source"
->
-  God does not play dice with the universe.
 </Blockquote>
 
 <!-- Epigraph 风格（用于章节开头） -->
@@ -196,7 +191,10 @@ cp rclone.conf.example rclone.conf
 ### 3. 同步图片
 
 ```bash
-rclone sync content/assets r2:blog-images --config rclone.conf
+# 仅同步图片文件，保留文章目录结构
+rclone sync content/posts r2:blog-images \
+  --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" \
+  --config rclone.conf
 ```
 
 ### 4. 部署 Worker
