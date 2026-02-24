@@ -20,5 +20,8 @@
     "remark-math": "^6.0.0",
     "tailwindcss": "^4.2.0",
     "unist-util-visit": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0"
   }
 }
