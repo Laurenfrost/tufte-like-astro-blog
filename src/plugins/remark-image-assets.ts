@@ -6,6 +6,9 @@ import path from 'node:path';
 interface RemarkImageAssetsOptions {
   baseUrl?: string;
   mode?: 'dev' | 'build';
+  /** Image transformation options for Mode B (URL-based, e.g. "format=auto,quality=80").
+   *  When set, build URLs use /cdn-cgi/image/{options}/ prefix. */
+  transformOptions?: string;
 }
 
 const defaultOptions: RemarkImageAssetsOptions = {
@@ -21,7 +24,7 @@ const defaultOptions: RemarkImageAssetsOptions = {
  * - Build mode: `./hero.jpg` → `https://img.example.com/posts/<post-dir>/hero.jpg`
  */
 export function remarkImageAssets(options: RemarkImageAssetsOptions = {}) {
-  const { baseUrl, mode } = { ...defaultOptions, ...options };
+  const { baseUrl, mode, transformOptions } = { ...defaultOptions, ...options };
 
   return (tree: Root, file: VFile) => {
     // Extract post directory name from file path
@@ -31,20 +34,19 @@ export function remarkImageAssets(options: RemarkImageAssetsOptions = {}) {
 
     if (!postDir) return;
 
+    const buildUrl = (filename: string): string => {
+      const imagePath = `posts/${postDir}/${filename}`;
+      if (mode === 'dev') return `/${imagePath}`;
+      // Mode B: insert /cdn-cgi/image/{options}/ when transformOptions is set
+      if (transformOptions) return `${baseUrl}/cdn-cgi/image/${transformOptions}/${imagePath}`;
+      return `${baseUrl}/${imagePath}`;
+    };
+
     const transformSrc = (src: string): string => {
       // Only transform relative paths starting with ./ or bare filenames
-      if (src.startsWith('./')) {
-        const filename = src.slice(2);
-        return mode === 'dev'
-          ? `/posts/${postDir}/${filename}`
-          : `${baseUrl}/posts/${postDir}/${filename}`;
-      }
+      if (src.startsWith('./')) return buildUrl(src.slice(2));
       // Also handle bare relative filenames (e.g. "image-4.png" without ./)
-      if (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) {
-        return mode === 'dev'
-          ? `/posts/${postDir}/${src}`
-          : `${baseUrl}/posts/${postDir}/${src}`;
-      }
+      if (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) return buildUrl(src);
       return src;
     };
 

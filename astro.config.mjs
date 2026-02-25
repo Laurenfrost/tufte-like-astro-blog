@@ -15,6 +15,8 @@ import path from 'node:path';
 
 // Image CDN base URL - configure for your R2 bucket
 const IMAGE_BASE_URL = process.env.IMAGE_BASE_URL || 'https://img.example.com';
+// Mode B (URL-based transforms): set to e.g. "format=auto,quality=80" when using custom domain
+const IMAGE_TRANSFORM_OPTIONS = process.env.IMAGE_TRANSFORM_OPTIONS || '';
 const isDev = process.argv.includes('dev');
 
 /** Vite plugin: serve images from content/posts/<dir>/ during dev */
@@ -72,7 +74,11 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [
       remarkMath,
-      [remarkImageAssets, { baseUrl: IMAGE_BASE_URL, mode: isDev ? 'dev' : 'build' }],
+      [remarkImageAssets, {
+        baseUrl: IMAGE_BASE_URL,
+        mode: isDev ? 'dev' : 'build',
+        ...(IMAGE_TRANSFORM_OPTIONS && { transformOptions: IMAGE_TRANSFORM_OPTIONS }),
+      }],
     ],
     rehypePlugins: [
       rehypeKatex,

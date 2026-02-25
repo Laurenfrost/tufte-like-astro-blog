@@ -9,7 +9,7 @@
 - **响应式设计** - 桌面端边注显示在右侧，移动端折叠为可点击展开
 - **零 JavaScript** - 边注交互完全基于 CSS checkbox 技巧实现
 - **边缘部署** - 基于 Cloudflare Pages SSR，全球边缘节点加速
-- **R2 图片托管** - 通过 Worker 代理访问 R2 存储的图片
+- **R2 图片托管** - 通过 Worker 代理访问 R2 存储的图片，自动转换为 AVIF/WebP
 - **数学公式** - 基于 KaTeX 的数学公式渲染，按需加载
 
 ## 技术栈
@@ -21,7 +21,7 @@
 | 样式 | Tailwind CSS 4.x + Typography |
 | 字体 | ET Book + EB Garamond + 霞鹜字体 |
 | 内容 | Astro Content Layer API (MDX) |
-| 图片 | Cloudflare R2 + Worker |
+| 图片 | Cloudflare R2 + Worker + Image Transformations |
 
 ## 快速开始
 
@@ -63,9 +63,72 @@ npm run preview
 │   ├── plugins/                # Remark 插件
 │   └── styles/                 # 全局样式
 ├── public/fonts/               # ET Book + EB Garamond + 霞鹜字体
-├── worker/                     # R2 图片代理 Worker
+├── worker/                     # R2 图片代理 + Image Transformations Worker
+│   ├── src/index.ts            # Worker 逻辑（R2 读取 → 格式转换 → 缓存）
+│   └── wrangler.toml           # Bindings: R2_BUCKET + IMAGES
 └── astro.config.mjs            # Astro 配置 + Vite 开发中间件
 ```
+
+## 架构
+
+### 整体架构
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Cloudflare Pages                      │
+│                  Astro SSR (边缘渲染)                     │
+│                                                         │
+│  content/posts/ ──→ Astro Content Layer ──→ HTML 页面    │
+│  (MDX + 图片)        (glob loader)                      │
+│                                                         │
+│  图片 URL 由 Remark 插件在构建时转换：                      │
+│  ./photo.jpg → https://worker-url/posts/slug/photo.jpg  │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼ 浏览器请求图片
+┌─────────────────────────────────────────────────────────┐
+│                   Cloudflare Worker                      │
+│                                                         │
+│  1. 检查 Cache API（命中 → 直接返回）                      │
+│  2. 从 R2 读取原图                                       │
+│  3. Images Binding 格式转换：                             │
+│     Accept: image/avif → AVIF (quality=80)              │
+│     Accept: image/webp → WebP (quality=80)              │
+│     其他 → 原格式压缩                                    │
+│  4. 写入 Cache API，返回响应                              │
+│                                                         │
+│  ⚡ SVG / GIF 跳过变换，直接返回原图                       │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│              Cloudflare R2 存储桶                         │
+│  posts/<slug>/photo.jpg  (由 rclone 从本地同步)           │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Tufte 栅格布局
+
+```
+┌─────────────────────────────────────────┐
+│           .tufte-container              │  ← max-width 容器
+│  ┌───────────────────────────────────┐  │
+│  │            Header                 │  │
+│  ├───────────────────────────────────┤  │
+│  │  ┌─────────────┬─────────────┐    │  │
+│  │  │   正文内容   │  Sidenote   │    │  │  ← 右侧 padding 预留
+│  │  │   (60%)     │   区域      │    │  │
+│  │  │             │   (40%)     │    │  │
+│  │  └─────────────┴─────────────┘    │  │
+│  ├───────────────────────────────────┤  │
+│  │            Footer                 │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+- 桌面端：Sidenote 显示在右侧边注区域
+- 移动端：Sidenote 折叠为可点击展开（纯 CSS，零 JS）
+- `wide` 模式页面（首页、归档等）不保留边注空间，正文扩展到全宽
 
 ## 写作指南
 
@@ -177,41 +240,73 @@ import Blockquote from '@components/Blockquote.astro';
 
 ## 图片系统配置
 
-### 1. 创建 R2 存储桶
+图片系统支持两种模式，可通过环境变量切换：
 
-在 Cloudflare Dashboard 中创建名为 `blog-images` 的 R2 存储桶。
+| | 模式 A：Worker Binding | 模式 B：URL 方式 |
+|---|---|---|
+| **适用场景** | 无自定义域名（当前） | 有自定义域名 |
+| **变换方式** | Worker 内 Images Binding | Cloudflare 边缘 `/cdn-cgi/image/` |
+| **需要 Worker** | 是 | 否 |
 
-### 2. 配置 Rclone
+### 模式 A 配置（当前使用）
+
+#### 1. 创建 R2 存储桶
+
+在 Cloudflare Dashboard 中创建名为 `tufte-style-blog-test` 的 R2 存储桶。
+
+#### 2. 配置 Rclone 并同步图片
 
 ```bash
 cp rclone.conf.example rclone.conf
 # 编辑 rclone.conf，填入你的 R2 凭证
-```
 
-### 3. 同步图片
-
-```bash
 # 仅同步图片文件，保留文章目录结构
-rclone sync content/posts r2:blog-images \
+rclone sync content r2:tufte-style-blog-test \
   --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" \
   --config rclone.conf
 ```
 
-### 4. 部署 Worker
+#### 3. 部署 Worker
 
 ```bash
 cd worker
 npm install
-npm run deploy
+npx wrangler deploy
 ```
 
-### 5. 配置环境变量
+Worker 会自动根据浏览器 `Accept` header 返回最优格式（AVIF > WebP > 原格式），quality=80。
+
+#### 4. 配置环境变量
 
 在 Cloudflare Pages 项目设置中添加：
 
 ```
-IMAGE_BASE_URL=https://img.yourdomain.com
+IMAGE_BASE_URL=https://your-worker.workers.dev
 ```
+
+#### 5. 本地测试 Worker
+
+```bash
+# Images Binding 需要 --remote 标志
+cd worker && npx wrangler dev --remote
+
+# 测试格式转换
+curl -H "Accept: image/avif" http://localhost:8787/posts/hello-world/hero.jpg -I
+curl -H "Accept: image/webp" http://localhost:8787/posts/hello-world/hero.jpg -I
+```
+
+### 模式 B 配置（将来有域名时）
+
+前提：R2 Bucket 绑定自定义域名 + 启用 Image Transformations。
+
+只需设置环境变量即可切换，无需改代码：
+
+```
+IMAGE_BASE_URL=https://img.yourdomain.com
+IMAGE_TRANSFORM_OPTIONS=format=auto,quality=80
+```
+
+此模式下 Worker 可废弃，Cloudflare 边缘自动处理图片变换和缓存。
 
 ## 部署
 
@@ -224,9 +319,10 @@ IMAGE_BASE_URL=https://img.yourdomain.com
 
 ### 环境变量
 
-| 变量 | 说明 |
-|------|------|
-| `IMAGE_BASE_URL` | R2 图片 CDN 域名 |
+| 变量 | 说明 | 示例 |
+|------|------|------|
+| `IMAGE_BASE_URL` | 图片服务地址 | `https://your-worker.workers.dev` |
+| `IMAGE_TRANSFORM_OPTIONS` | 模式 B URL 变换参数（可选） | `format=auto,quality=80` |
 
 ## 自定义
 

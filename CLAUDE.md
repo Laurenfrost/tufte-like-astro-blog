@@ -118,19 +118,48 @@ import Sidenote from '@components/Sidenote.astro';
 
 ### 3. Image Pipeline
 
+两种图片优化模式，通过配置切换：
+
+#### 模式 A：Worker Binding（当前，无自定义域名）
+
 ```
 content/posts/<slug>/hero.jpg      ← 图片与文章同目录
          │
-         ├─ Dev 模式 ──→ Vite 中间件 ──→ /<slug>/hero.jpg (本地文件)
+         ├─ Dev 模式 ──→ Vite 中间件 ──→ /posts/<slug>/hero.jpg (本地文件)
          │
-         └─ Build 模式 ─→ Remark 插件 ──→ https://img.example.com/<slug>/hero.jpg
+         └─ Build 模式 ─→ Remark 插件 ──→ https://worker-url/posts/<slug>/hero.jpg
                               │
                               ▼ (rclone sync)
-                         R2 Bucket: blog-images/<slug>/hero.jpg
-                              │
-                              ▼ (Worker proxy)
-                         Public URL: https://img.yourdomain.com/<slug>/hero.jpg
+                         R2 Bucket ──→ Worker ──→ Images Binding 变换
+                                          │
+                                          ├─ Accept: image/avif → AVIF
+                                          ├─ Accept: image/webp → WebP
+                                          └─ 其他 → 原格式 (quality=80)
+                                          │
+                                          ▼ (Cache API 缓存)
+                                     返回优化后图片
 ```
+
+- Worker (`worker/src/index.ts`) 使用 Cloudflare Images Binding (`env.IMAGES`) 做格式转换
+- 根据 `Accept` header 自动选最优格式：AVIF > WebP > 原格式
+- SVG 和 GIF 跳过变换，直接返回原图
+- Cache API 缓存，key 包含格式信息（`Vary: Accept`）
+- `wrangler.toml` 中 R2 binding 为 `R2_BUCKET`，Images binding 为 `IMAGES`
+
+#### 模式 B：URL 方式（将来有自定义域名时）
+
+```
+Build 模式 → Remark 插件 → https://img.domain.com/cdn-cgi/image/format=auto,quality=80/posts/<slug>/hero.jpg
+                                    ↓
+                           Cloudflare 边缘自动变换 + 缓存
+```
+
+- 前提：R2 Bucket 绑定自定义域名 + 启用 Image Transformations
+- 不需要 Worker，Cloudflare 边缘自动处理
+- 通过环境变量 `IMAGE_TRANSFORM_OPTIONS` 启用（如 `format=auto,quality=80`）
+- Remark 插件自动在 URL 中插入 `/cdn-cgi/image/{options}/` 前缀
+
+**切换方式：** 设置环境变量 `IMAGE_TRANSFORM_OPTIONS=format=auto,quality=80` 即可从模式 A 切换到模式 B。
 
 **MDX 中引用图片：**
 ```mdx
@@ -139,12 +168,13 @@ content/posts/<slug>/hero.jpg      ← 图片与文章同目录
 
 **Remark 插件** (`src/plugins/remark-image-assets.ts`)：
 - 从 `vfile.path` 提取文章目录名（如 `hello-world`）
-- Dev 模式：`./hero.jpg` → `/<slug>/hero.jpg`（由 Vite 中间件从本地读取）
-- Build 模式：`./hero.jpg` → `https://img.example.com/<slug>/hero.jpg`
+- Dev 模式：`./hero.jpg` → `/posts/<slug>/hero.jpg`（由 Vite 中间件从本地读取）
+- Build 模式（无 transformOptions）：`./hero.jpg` → `${baseUrl}/posts/<slug>/hero.jpg`
+- Build 模式（有 transformOptions）：`./hero.jpg` → `${baseUrl}/cdn-cgi/image/${options}/posts/<slug>/hero.jpg`
 
 **Vite 开发中间件** (`astro.config.mjs`)：
 - 仅在 Dev 模式下启用
-- 拦截 `/<slug>/<image>` 请求（匹配已知图片扩展名：jpg/png/gif/webp/avif/svg）
+- 拦截 `/posts/<slug>/<image>` 请求（匹配已知图片扩展名：jpg/png/gif/webp/avif/svg）
 - 从 `content/posts/<slug>/` 读取文件返回
 - 不干扰页面路由
 
@@ -308,7 +338,8 @@ When modifying these files, understand their role:
 | `src/layouts/BaseLayout.astro` | Master layout with Tufte grid |
 | `src/plugins/remark-image-assets.ts` | Image path transformation (dev: local, build: CDN) |
 | `src/components/Sidenote.astro` | Core interactive component |
-| `worker/src/index.ts` | R2 image proxy logic |
+| `worker/src/index.ts` | R2 image proxy + Image Transformations (Mode A) |
+| `worker/wrangler.toml` | Worker config: R2 binding (`R2_BUCKET`) + Images binding (`IMAGES`) |
 
 ## Implementation Progress
 
@@ -341,8 +372,9 @@ When modifying these files, understand their role:
 - [x] Navigation pages (archive, links, about)
 - [x] Multi-font stack (ET Book + EB Garamond + 霞鹜)
 - [x] Content Layer API migration (content/ 与 src/ 解耦)
+- [x] Cloudflare Image Transformations (Mode A: Worker Binding, Mode B: URL 预留)
 - [ ] RSS feed
-- [ ] Performance optimization (fonts, images)
+- [ ] Performance optimization (fonts)
 
 **Math Support:**
 - Enable with `math: true` in frontmatter
