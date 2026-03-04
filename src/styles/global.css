@@ -230,17 +230,19 @@ pre {
   line-height: 1.4;
   padding: 0.5rem;
   overflow-x: auto;
-  background-color: #f6f8fa !important;
-  border: 1px solid #e1e4e8;
-  border-radius: 4px;
-  counter-reset: line;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  background-color: var(--color-tufte-bg) !important;
+  border: none;
+  border-radius: 0;
+  white-space: pre;
 }
 
-/* Line numbers */
-pre code {
-  counter-reset: line;
+pre::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
+/* Line numbers - hidden by default */
 pre code > .line {
   display: inline-block;
   width: 100%;
@@ -249,7 +251,7 @@ pre code > .line {
 pre code > .line::before {
   counter-increment: line;
   content: counter(line);
-  display: inline-block;
+  display: none;
   width: 1.5rem;
   margin-right: 0.75rem;
   text-align: right;
@@ -257,15 +259,27 @@ pre code > .line::before {
   font-size: 0.85em;
 }
 
+/* Show line numbers when opt-in — counter-reset is set via inline style on <code> by shiki-meta-transformer */
+
+pre[data-lineno] code > .line::before {
+  display: inline-block;
+}
+
+/* Wrapping when opt-in */
+pre[data-wrap] {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
 /* Highlighted lines */
 pre code > .line.highlighted {
   background-color: rgba(255, 220, 100, 0.3);
-  margin-left: -1rem;
-  margin-right: -1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
   display: inline-block;
-  width: calc(100% + 2rem);
+  width: calc(100% + 1rem);
 }
 
 code {

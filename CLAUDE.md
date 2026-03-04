@@ -49,7 +49,8 @@ A modern blog with Tufte-inspired scientific typography. Core features include s
 │   │   ├── about.astro            # 关于页 (wide mode)
 │   │   └── posts/[...slug].astro  # Dynamic post pages (with sidenotes)
 │   ├── plugins/
-│   │   └── remark-image-assets.ts # Image path transformation (dev/build)
+│   │   ├── remark-image-assets.ts # Image path transformation (dev/build)
+│   │   └── shiki-meta-transformer.ts # Code block meta string parser (wrap, lineno, hl_lines, linenostart)
 │   └── styles/
 │       └── global.css             # @font-face, @theme, base styles
 ├── public/
@@ -337,6 +338,7 @@ When modifying these files, understand their role:
 | `tsconfig.json` | Path aliases (`@components/*` → `src/components/*`) |
 | `src/layouts/BaseLayout.astro` | Master layout with Tufte grid |
 | `src/plugins/remark-image-assets.ts` | Image path transformation (dev: local, build: CDN) |
+| `src/plugins/shiki-meta-transformer.ts` | Shiki transformer: opt-in wrap, line numbers, highlights via meta string |
 | `src/components/Sidenote.astro` | Core interactive component |
 | `worker/src/index.ts` | R2 image proxy + Image Transformations (Mode A) |
 | `worker/wrangler.toml` | Worker config: R2 binding (`R2_BUCKET`) + Images binding (`IMAGES`) |
@@ -383,8 +385,14 @@ When modifying these files, understand their role:
 
 **Code Blocks:**
 - Shiki 语法高亮，使用 `github-light` 主题
-- 支持行号显示 (CSS counters)
-- 支持行高亮: meta 语法 ` ```js {1,3-5}` 或行内 `// [!code highlight]`
+- 默认无边框、页面背景色、不换行、不显示行号（Tufte 简洁风格）
+- 所有功能通过 meta string 按需启用：` ```go {wrap=true,lineno=true,hl_lines=["2-5"],linenostart=199} `
+  - `wrap=true` — 启用自动换行
+  - `lineno=true` — 显示行号 (CSS counters)
+  - `linenostart=N` — 行号起始值
+  - `hl_lines=["2-5","8"]` — 高亮指定行（支持范围）
+- 行内高亮: `// [!code highlight]`（transformerNotationHighlight）
+- 自定义 Shiki transformer: `src/plugins/shiki-meta-transformer.ts`
 
 ## Notes for AI Assistants
 

@@ -11,6 +11,7 @@
 - **边缘部署** - 基于 Cloudflare Pages SSR，全球边缘节点加速
 - **R2 图片托管** - 通过 Worker 代理访问 R2 存储的图片，自动转换为 AVIF/WebP
 - **数学公式** - 基于 KaTeX 的数学公式渲染，按需加载
+- **代码块** - Shiki 语法高亮，支持按需启用行号、换行、行高亮
 
 ## 技术栈
 
@@ -60,7 +61,7 @@ npm run preview
 │   │   └── Fullwidth.astro     # 全宽内容
 │   ├── layouts/                # 页面布局
 │   ├── pages/                  # 路由页面
-│   ├── plugins/                # Remark 插件
+│   ├── plugins/                # Remark 插件 + Shiki transformer
 │   └── styles/                 # 全局样式
 ├── public/fonts/               # ET Book + EB Garamond + 霞鹜字体
 ├── worker/                     # R2 图片代理 + Image Transformations Worker
@@ -222,6 +223,46 @@ $$
 $$
 ```
 
+### 使用代码块
+
+默认代码块无边框、页面背景色、不换行、不显示行号。所有功能通过 meta string 按需启用：
+
+````markdown
+<!-- 纯净代码块（默认） -->
+```go
+fmt.Println("hello")
+```
+
+<!-- 启用自动换行 -->
+```go {wrap=true}
+fmt.Println("a very long line...")
+```
+
+<!-- 显示行号，从第 199 行开始 -->
+```go {lineno=true,linenostart=199}
+func main() {
+    fmt.Println("hello")
+}
+```
+
+<!-- 高亮指定行 -->
+```go {hl_lines=["2-3"]}
+func main() {
+    fmt.Println("hello")   // highlighted
+    fmt.Println("world")   // highlighted
+}
+```
+
+<!-- 组合使用 -->
+```go {wrap=true,lineno=true,hl_lines=["202-205"],linenostart=199}
+```
+
+<!-- 行内高亮标记 -->
+```go
+fmt.Println("highlighted") // [!code highlight]
+```
+````
+
 ### 使用引用
 
 ```mdx
@@ -271,14 +312,14 @@ rclone sync content r2:tufte-style-blog-test \
 ```bash
 cd worker
 npm install
-npx wrangler deploy
+npx wrangler deploy -c wrangler.toml
 ```
 
 Worker 会自动根据浏览器 `Accept` header 返回最优格式（AVIF > WebP > 原格式），quality=80。
 
 #### 4. 配置环境变量
 
-在 Cloudflare Pages 项目设置中添加：
+在构建时的环境中添加：
 
 ```
 IMAGE_BASE_URL=https://your-worker.workers.dev

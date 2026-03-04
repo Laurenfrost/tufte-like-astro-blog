@@ -6,10 +6,8 @@ import mdx from '@astrojs/mdx';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { remarkImageAssets } from './src/plugins/remark-image-assets';
-import {
-  transformerNotationHighlight,
-  transformerMetaHighlight,
-} from '@shikijs/transformers';
+import { transformerNotationHighlight } from '@shikijs/transformers';
+import { shikiMetaTransformer } from './src/plugins/shiki-meta-transformer';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -85,10 +83,10 @@ export default defineConfig({
     ],
     shikiConfig: {
       theme: 'github-light',
-      wrap: true,
+      wrap: false,
       transformers: [
         transformerNotationHighlight(),
-        transformerMetaHighlight(),
+        shikiMetaTransformer(),
       ],
     },
   },
