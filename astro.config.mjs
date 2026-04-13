@@ -11,10 +11,14 @@ import { shikiMetaTransformer } from './src/plugins/shiki-meta-transformer';
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { loadEnv } from 'vite';
+
+const env = loadEnv(process.env.NODE_ENV || 'production', process.cwd(), '');
+
 // Image CDN base URL - configure for your R2 bucket
-const IMAGE_BASE_URL = process.env.IMAGE_BASE_URL || 'https://img.example.com';
+const IMAGE_BASE_URL = env.IMAGE_BASE_URL || process.env.IMAGE_BASE_URL || 'https://img.example.com';
 // Mode B (URL-based transforms): set to e.g. "format=auto,quality=80" when using custom domain
-const IMAGE_TRANSFORM_OPTIONS = process.env.IMAGE_TRANSFORM_OPTIONS || '';
+const IMAGE_TRANSFORM_OPTIONS = env.IMAGE_TRANSFORM_OPTIONS || process.env.IMAGE_TRANSFORM_OPTIONS || '';
 const isDev = process.argv.includes('dev');
 
 /** Vite plugin: serve images from content/posts/<dir>/ during dev */
