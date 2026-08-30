@@ -36,7 +36,7 @@ A modern blog with Tufte-inspired scientific typography. Core features include s
 │   │   ├── Footer.astro           # Site footer with credits
 │   │   ├── Sidenote.astro         # Numbered sidenotes with CSS toggle
 │   │   ├── Marginnote.astro       # Unnumbered margin notes
-│   │   ├── Figure.astro           # Images with caption/credit
+│   │   ├── Figure.astro           # Images with caption/credit (normal / fullwidth / bleed)
 │   │   ├── MarginFigure.astro     # Small images in margin area
 │   │   ├── Blockquote.astro       # Quotes with author/source
 │   │   └── Fullwidth.astro        # Full-width content wrapper
@@ -211,6 +211,19 @@ Build 模式 → Remark 插件 → https://img.domain.com/cdn-cgi/image/format=a
 | 768-1023px | 900px | 35% | 平板 |
 | 1024-1399px | 1000px | 38% | 桌面 |
 | ≥ 1400px | 1100px | 400px | 宽屏 |
+
+**图片宽度模式（`Figure.astro`）：**
+
+| 模式 | 写法 | 宽度 | 适用 |
+|------|------|------|------|
+| 正文宽 | `<Figure />` | 正文栏（≥1400px 时 600px），说明文字在边注栏 | 一般插图 |
+| 全宽 | `<Figure fullwidth />` | 容器内容宽（≥1400px 时 1000px），说明文字居中于图下 | 宽表格、多面板图 |
+| 出血 | `<Figure bleed />` | 视口宽（左右各留 2rem），图片最大 1400px | 需要突破容器的大图 |
+
+`fullwidth` 与 `bleed` 都靠「正文内容盒的左边缘 = 容器内容盒的左边缘」来定位：
+`margin-left` 保持 0（fullwidth）或按 `(容器内容宽 − 100vw) / 2` 计算（bleed）。
+注意容器的 `padding: 0 4%` 是相对**视口**解析的，不是相对它自己的 `max-width`，
+所以断点里出现的是 `8vw` / `54vw` 这样的系数。
 
 **Wide 模式：**
 - `BaseLayout` 支持 `wide` 属性
