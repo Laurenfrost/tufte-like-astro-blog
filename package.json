@@ -43,7 +43,8 @@
     "deploy:worker": "cd worker && npx wrangler deploy"
   },
   "peerDependencies": {
-    "astro": "^5.0.0"
+    "astro": "^5.0.0",
+    "tailwindcss": "^4.0.0"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
@@ -52,7 +53,6 @@
     "@tailwindcss/vite": "^4.2.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "tailwindcss": "^4.2.0",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {

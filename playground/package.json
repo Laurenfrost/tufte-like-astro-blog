@@ -12,7 +12,8 @@
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",
     "@laurenfrost/astro-tufte": "file:..",
-    "astro": "^5.17.1"
+    "astro": "^5.17.1",
+    "tailwindcss": "^4.2.0"
   },
   "devDependencies": {
     "wrangler": "^4.68.1"

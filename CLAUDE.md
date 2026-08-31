@@ -53,12 +53,12 @@ enters this repo. `playground/` is a runnable example site used to develop and v
     ├── src/styles/site.css
     ├── src/pages/about.astro
     └── content/posts/<slug>/index.mdx
-
-private-blog/                      # 私有博客仓库的脚手架（.gitignore，待移出）
 ```
 
 消费者（私有仓库）只需要四样东西：`astro.config.mjs`、`src/content.config.ts`、
-`src/styles/site.css`、`content/posts/`。
+`src/styles/site.css`、`content/posts/`，外加自己的 `tailwindcss` 依赖
+（Tailwind 入口在消费者侧，`@import "tailwindcss"` 必须从消费者的 node_modules 解析，
+所以主题把它声明成 peerDependency）。实际使用者是 `../laurenfrost.ink`。
 
 ## Architecture Decisions
 
@@ -92,6 +92,7 @@ Using `output: 'server'` with `@astrojs/cloudflare`. This enables:
 | `src/content.config.ts` 位置固定 | 注入不了，消费者自己写，schema 从 `@laurenfrost/astro-tufte/schema` 导入 |
 | config 期执行的代码 | `integration.mjs` 和两个插件都是 `.mjs` + JSDoc，**不要改回 `.ts`**，否则被 externalize 后 Node 直接跑 TS |
 | `public/` 注入不了 | 字体改走 `src/fonts/` + fonts.css 里的相对 `url()`，Vite 打包；favicon 归消费者 |
+| `tailwindcss` 解析不到 | 它是消费者的 peerDependency，不是主题的 dependency——playground 因为同属一个 workspace 会掩盖这个问题，改包装后要用真实消费者验证 |
 
 **Content Layer**（消费者侧）：
 

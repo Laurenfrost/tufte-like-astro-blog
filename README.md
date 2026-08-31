@@ -9,7 +9,7 @@ Tufte 风格的 Astro 主题：边注（sidenote）、旁注（margin note）、
 主题不需要发布到 npm，直接用 git 依赖：
 
 ```bash
-npm i astro @astrojs/cloudflare
+npm i astro @astrojs/cloudflare tailwindcss
 npm i github:Laurenfrost/tufte-like-astro-blog#v0.2.0
 ```
 
