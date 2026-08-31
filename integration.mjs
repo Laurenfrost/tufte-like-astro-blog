@@ -57,6 +57,7 @@ const DEFAULT_SITE = {
     archiveCount: '共 {count} 篇文章',
     linksTitle: '友链',
     linksIntro: '',
+    contents: 'Contents',
   },
   katexCss: 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css',
 };

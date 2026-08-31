@@ -10,7 +10,7 @@ Tufte 风格的 Astro 主题：边注（sidenote）、旁注（margin note）、
 
 ```bash
 npm i astro @astrojs/cloudflare
-npm i github:Laurenfrost/tufte-like-astro-blog#v0.1.0
+npm i github:Laurenfrost/tufte-like-astro-blog#v0.2.0
 ```
 
 ## 使用
@@ -92,7 +92,11 @@ import Sidenote from '@laurenfrost/astro-tufte/components/Sidenote.astro';
 import Figure from '@laurenfrost/astro-tufte/components/Figure.astro';
 ```
 
-`Sidenote` `MarginNote` `Figure` `MarginFigure` `Blockquote` `Cite` `Fullwidth` `Ruby`。
+`Sidenote` `MarginNote` `Figure` `MarginFigure` `Blockquote` `Cite` `Fullwidth` `Ruby`
+`TableOfContents`。
+
+文章 frontmatter 里写 `toc: true` 就会在正文上方渲染一个可折叠的目录（h2–h3），
+不需要自己引入 `TableOfContents`。
 
 **自动配置的 Markdown 流水线**：MDX、KaTeX（`math: true` 时才加载 CSS）、Shiki + 自定义 meta string
 （` ```go {wrap=true,lineno=true,hl_lines=["2-5"],linenostart=199} `）、图片路径改写。

@@ -351,6 +351,7 @@ npm run sync:images    # rclone sync content/posts r2:blog-images
 | `src/plugins/shiki-meta-transformer.mjs` | Shiki transformer：wrap / 行号 / 高亮 |
 | `src/schema.mjs` | 文章 frontmatter schema（用 `astro/zod`，不用 `astro:content`） |
 | `src/components/Sidenote.astro` | 核心交互组件 |
+| `src/components/TableOfContents.astro` | frontmatter `toc: true` 时渲染的折叠目录（h2–h3） |
 | `worker/src/index.ts` | R2 图床代理 + Image Transformations（模式 A） |
 | `playground/astro.config.mjs` | 消费者用法的参考实现 |
 

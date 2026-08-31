@@ -27,6 +27,7 @@ declare module 'virtual:astro-tufte/config' {
       archiveCount: string;
       linksTitle: string;
       linksIntro: string;
+      contents: string;
     };
     katexCss: string;
   }

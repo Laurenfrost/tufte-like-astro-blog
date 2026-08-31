@@ -1,0 +1,146 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  /** The `headings` returned by `render(post)`. */
+  headings: MarkdownHeading[];
+  /** Shallowest heading level to include. `1` would pull in the post title. */
+  minDepth?: number;
+  /** Deepest heading level to include. */
+  maxDepth?: number;
+  /** Text on the disclosure toggle. */
+  label?: string;
+  /** Render the list expanded. */
+  open?: boolean;
+}
+
+const { headings, minDepth = 2, maxDepth = 3, label = 'Contents', open = false } = Astro.props;
+
+interface TocNode extends MarkdownHeading {
+  children: TocNode[];
+}
+
+/** Flat heading list → nested tree, tolerating skipped levels (h2 → h4). */
+function buildTree(items: MarkdownHeading[]): TocNode[] {
+  const roots: TocNode[] = [];
+  const stack: TocNode[] = [];
+
+  for (const heading of items) {
+    const node: TocNode = { ...heading, children: [] };
+
+    while (stack.length > 0 && stack[stack.length - 1].depth >= node.depth) {
+      stack.pop();
+    }
+
+    if (stack.length === 0) {
+      roots.push(node);
+    } else {
+      stack[stack.length - 1].children.push(node);
+    }
+
+    stack.push(node);
+  }
+
+  return roots;
+}
+
+const visible = headings.filter((h) => h.depth >= minDepth && h.depth <= maxDepth);
+const tree = buildTree(visible);
+
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+function renderList(nodes: TocNode[]): string {
+  const items = nodes
+    .map(
+      (node) =>
+        `<li><a href="#${encodeURIComponent(node.slug)}">${escapeHtml(node.text)}</a>` +
+        (node.children.length > 0 ? renderList(node.children) : '') +
+        '</li>'
+    )
+    .join('');
+  return `<ul>${items}</ul>`;
+}
+---
+
+{tree.length > 0 && (
+  <details class="toc" open={open}>
+    <summary>{label}</summary>
+    <nav aria-label={label} set:html={renderList(tree)} />
+  </details>
+)}
+
+<style>
+  .toc {
+    margin: 2rem 0 3rem;
+    font-size: 0.9rem;
+  }
+
+  .toc summary {
+    font-family: var(--font-serif-italic);
+    font-style: italic;
+    color: #555;
+    cursor: pointer;
+    list-style: none;
+    display: inline-block;
+    border-bottom: 1px solid transparent;
+  }
+
+  /* Replace the default disclosure triangle with a Tufte-ish marker */
+  .toc summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc summary::before {
+    content: "+";
+    display: inline-block;
+    width: 1rem;
+    color: #999;
+  }
+
+  .toc[open] summary::before {
+    content: "−";
+  }
+
+  .toc summary:hover {
+    color: #111;
+    border-bottom-color: #ccc;
+  }
+
+  .toc nav {
+    margin-top: 0.75rem;
+    padding-left: 1rem;
+  }
+
+  .toc :global(ul) {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .toc :global(ul ul) {
+    padding-left: 1.25rem;
+  }
+
+  .toc :global(li) {
+    margin: 0.3rem 0;
+    line-height: 1.4;
+  }
+
+  .toc :global(a) {
+    color: #555;
+    text-decoration: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .toc :global(a:hover) {
+    color: #111;
+    border-bottom-color: #111;
+  }
+
+  @media (max-width: 767px) {
+    .toc {
+      font-size: 0.85rem;
+    }
+  }
+</style>

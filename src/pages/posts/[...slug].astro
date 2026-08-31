@@ -2,6 +2,7 @@
 import { getEntry, render } from 'astro:content';
 import { site } from 'virtual:astro-tufte/config';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
 
 const { slug: id } = Astro.params;
 
@@ -15,7 +16,7 @@ if (!post || post.data.draft) {
   return Astro.redirect('/404');
 }
 
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description} math={post.data.math}>
@@ -37,6 +38,8 @@ const { Content } = await render(post);
       </div>
     )}
   </header>
+
+  {post.data.toc && <TableOfContents headings={headings} label={site.text.contents} />}
 
   <div class="prose prose-lg max-w-none">
     <Content />

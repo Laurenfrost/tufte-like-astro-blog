@@ -15,6 +15,9 @@ export const postSchema = z.object({
   tags: z.array(z.string()).optional(),
   description: z.string().optional(),
   math: z.boolean().default(false),
+  /** Render a table of contents above the post body. */
+  toc: z.boolean().default(false),
+  categories: z.array(z.string()).optional(),
 });
 
 /** Strips the trailing `/index.mdx` so a post's id is its directory name. */
