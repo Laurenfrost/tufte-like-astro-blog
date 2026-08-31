@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "@laurenfrost/astro-tufte/theme.css";
+
+/* Uncomment if you want Tailwind utility classes to work inside the theme's own
+   components (e.g. after copying one into src/ and editing it): */
+/* @source "../../node_modules/@laurenfrost/astro-tufte/src"; */

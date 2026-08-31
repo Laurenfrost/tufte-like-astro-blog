@@ -1,22 +1,14 @@
 ---
+import { site } from 'virtual:astro-tufte/config';
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const links = [
-  {
-    name: '示例友链',
-    url: 'https://example.com',
-    description: '这是一个示例友链的描述文字',
-  },
-  // 在这里添加更多友链
-];
 ---
 
-<BaseLayout title="友链 - Tufte Style Blog" description="友情链接" wide>
-  <h1>友链</h1>
-  <p class="links-intro">这里是一些我喜欢的网站和朋友们的博客。</p>
+<BaseLayout title={site.text.linksTitle} wide>
+  <h1>{site.text.linksTitle}</h1>
+  {site.text.linksIntro && <p class="links-intro">{site.text.linksIntro}</p>}
 
   <ul class="links-list">
-    {links.map(link => (
+    {site.links.map(link => (
       <li class="link-item">
         <a href={link.url} target="_blank" rel="noopener noreferrer" class="link-name">
           {link.name}

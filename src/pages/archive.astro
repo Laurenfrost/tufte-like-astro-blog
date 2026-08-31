@@ -1,6 +1,7 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { site } from 'virtual:astro-tufte/config';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
 const posts = await getCollection('posts', ({ data }) => !data.draft);
 
@@ -15,11 +16,12 @@ const postsByYear = posts
   }, {} as Record<number, typeof posts>);
 
 const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
+const count = site.text.archiveCount.replace('{count}', String(posts.length));
 ---
 
-<BaseLayout title="归档 - Tufte Style Blog" description="所有文章归档" wide>
-  <h1>归档</h1>
-  <p class="archive-count">共 {posts.length} 篇文章</p>
+<BaseLayout title={site.text.archiveTitle} wide>
+  <h1>{site.text.archiveTitle}</h1>
+  <p class="archive-count">{count}</p>
 
   {years.map(year => (
     <section class="archive-year">
@@ -28,7 +30,7 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
         {postsByYear[Number(year)].map(post => (
           <li>
             <time datetime={post.data.date.toISOString()}>
-              {post.data.date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}
+              {post.data.date.toLocaleDateString(site.locale, { month: '2-digit', day: '2-digit' })}
             </time>
             <a href={`/posts/${post.id}`}>{post.data.title}</a>
           </li>

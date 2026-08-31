@@ -1,22 +1,55 @@
 {
-  "name": "fumbling-filament",
+  "name": "@laurenfrost/astro-tufte",
+  "version": "0.1.0",
   "type": "module",
-  "version": "0.0.1",
+  "description": "Tufte-inspired Astro theme with sidenotes, margin notes and CJK-aware typography",
+  "keywords": [
+    "astro-integration",
+    "astro-component",
+    "astro-theme",
+    "withastro",
+    "tufte",
+    "typography"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/Laurenfrost/tufte-like-astro-blog",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Laurenfrost/tufte-like-astro-blog.git"
+  },
+  "exports": {
+    ".": "./integration.mjs",
+    "./schema": "./src/schema.mjs",
+    "./theme.css": "./src/styles/theme.css",
+    "./fonts.css": "./src/styles/fonts.css",
+    "./components/*.astro": "./src/components/*.astro",
+    "./layouts/*.astro": "./src/layouts/*.astro",
+    "./pages/*.astro": "./src/pages/*.astro",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "integration.mjs",
+    "src",
+    "virtual.d.ts"
+  ],
+  "types": "./virtual.d.ts",
+  "workspaces": [
+    "playground"
+  ],
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "deploy": "wrangler deploy",
-    "astro": "astro"
+    "dev": "npm run dev -w playground",
+    "build": "npm run build -w playground",
+    "preview": "npm run preview -w playground",
+    "deploy:worker": "cd worker && npx wrangler deploy"
+  },
+  "peerDependencies": {
+    "astro": "^5.0.0"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/mdx": "^4.3.13",
     "@shikijs/transformers": "^3.22.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.0",
-    "astro": "^5.17.1",
-    "katex": "^0.16.28",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "tailwindcss": "^4.2.0",
@@ -24,6 +57,6 @@
   },
   "devDependencies": {
     "@types/node": "^25.3.0",
-    "wrangler": "^4.68.1"
+    "astro": "^5.17.1"
   }
 }

@@ -1,11 +1,9 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"],
+  "include": ["virtual.d.ts", "integration.mjs", "src/**/*"],
+  "exclude": ["playground", "worker", "node_modules"],
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@components/*": ["src/components/*"]
-    }
+    "allowJs": true,
+    "checkJs": false
   }
 }

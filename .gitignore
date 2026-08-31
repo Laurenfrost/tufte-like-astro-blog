@@ -20,11 +20,16 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-# jetbrains setting folder
+# editor / tooling settings
 .idea/
+.vscode/
+.air/
 
 # Image assets (synced via rclone to R2)
 content/assets/
+
+# Private blog content — lives in the private repo, never commit it here
+private-blog/
 
 # Rclone config (contains credentials)
 rclone.conf

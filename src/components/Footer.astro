@@ -1,16 +1,19 @@
 ---
+import { site } from 'virtual:astro-tufte/config';
+
 const currentYear = new Date().getFullYear();
+const copyright = site.footer.copyright || `© ${currentYear} ${site.title}.`;
 ---
 
 <hr class="footer-divider" />
 <footer class="site-footer">
-  <p class="credit">
-    使用 <a href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a> 构建，
-    灵感源自 <a href="https://edwardtufte.github.io/tufte-css/" target="_blank" rel="noopener noreferrer">Tufte CSS</a>
-  </p>
-  <p class="copyright">
-    &copy; {currentYear} Tufte Style Blog. All rights reserved.
-  </p>
+  {site.footer.credit && (
+    <p class="credit">
+      使用 <a href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a> 构建，
+      灵感源自 <a href="https://edwardtufte.github.io/tufte-css/" target="_blank" rel="noopener noreferrer">Tufte CSS</a>
+    </p>
+  )}
+  <p class="copyright">{copyright}</p>
 </footer>
 
 <style>

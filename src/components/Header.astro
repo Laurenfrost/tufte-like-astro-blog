@@ -1,26 +1,21 @@
 ---
+import { site } from 'virtual:astro-tufte/config';
+
 interface Props {
   currentPath?: string;
 }
 
 const { currentPath = '' } = Astro.props;
-
-const navItems = [
-  { href: '/', label: 'HOME' },
-  { href: '/archive', label: 'ARCHIVE' },
-  { href: '/links', label: 'FRIENDS' },
-  { href: '/about', label: 'ABOUT' },
-];
 ---
 
 <header class="site-header">
   <div class="site-branding">
-    <a class="site-title">Tufte Style Blog</a>
-    <p class="site-description">A modern implementation with Astro and Tailwind CSS 探索清晰、优雅的信息呈现方式</p>
+    <a class="site-title" href="/">{site.title}</a>
+    {site.tagline && <p class="site-description">{site.tagline}</p>}
   </div>
   <nav class="site-nav">
     <ul>
-      {navItems.map(item => (
+      {site.nav.map(item => (
         <li>
           <a
             href={item.href}

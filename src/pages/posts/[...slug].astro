@@ -1,5 +1,6 @@
 ---
 import { getEntry, render } from 'astro:content';
+import { site } from 'virtual:astro-tufte/config';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const { slug: id } = Astro.params;
@@ -18,14 +19,12 @@ const { Content } = await render(post);
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description} math={post.data.math}>
-  <header class="mb-12">
-    <h1 class="text-4xl font-normal mt-8 mb-2">{post.data.title}</h1>
-    {post.data.subtitle && (
-      <p class="text-xl text-gray-600 italic mt-1">{post.data.subtitle}</p>
-    )}
-    <p class="text-gray-600 mt-2">
+  <header class="post-header">
+    <h1>{post.data.title}</h1>
+    {post.data.subtitle && <p class="post-subtitle">{post.data.subtitle}</p>}
+    <p class="post-meta">
       <time datetime={post.data.date.toISOString()}>
-        {post.data.date.toLocaleDateString('zh-CN', {
+        {post.data.date.toLocaleDateString(site.locale, {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
@@ -33,10 +32,8 @@ const { Content } = await render(post);
       </time>
     </p>
     {post.data.tags && (
-      <div class="mt-2 flex gap-2">
-        {post.data.tags.map((tag: string) => (
-          <span class="text-sm text-gray-500">#{tag}</span>
-        ))}
+      <div class="post-tags">
+        {post.data.tags.map((tag: string) => <span class="post-tag">#{tag}</span>)}
       </div>
     )}
   </header>
@@ -45,3 +42,38 @@ const { Content } = await render(post);
     <Content />
   </div>
 </BaseLayout>
+
+<style>
+  .post-header {
+    margin-bottom: 3rem;
+  }
+
+  .post-header h1 {
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .post-subtitle {
+    font-family: var(--font-serif-italic);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: #555;
+    margin: 0.25rem 0 0;
+  }
+
+  .post-meta {
+    color: #666;
+    margin: 0.5rem 0 0;
+  }
+
+  .post-tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .post-tag {
+    font-size: 0.875rem;
+    color: #888;
+  }
+</style>

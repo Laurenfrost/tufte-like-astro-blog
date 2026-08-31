@@ -1,0 +1,110 @@
+
+/* ============================================
+   ET Book Font Family
+   - Old-style figures for body text (traditional look)
+   - Line figures available for tabular data
+   ============================================ */
+
+/* ET Book Roman - Old Style Figures (正文) */
+@font-face {
+  font-family: "ET Book";
+  src: url("../fonts/et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.woff") format("woff"),
+       url("../fonts/et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ET Book Display Italic - Old Style Figures (斜体) */
+@font-face {
+  font-family: "ET Book";
+  src: url("../fonts/et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff") format("woff"),
+       url("../fonts/et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ET Book Semi Bold - Old Style Figures (半粗体) */
+@font-face {
+  font-family: "ET Book";
+  src: url("../fonts/et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff") format("woff"),
+       url("../fonts/et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ET Book Bold - Line Figures (粗体) */
+@font-face {
+  font-family: "ET Book";
+  src: url("../fonts/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff") format("woff"),
+       url("../fonts/et-book/et-book-bold-line-figures/et-book-bold-line-figures.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ET Book Roman - Line Figures (等高数字，用于表格等) */
+@font-face {
+  font-family: "ET Book Lining";
+  src: url("../fonts/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff") format("woff"),
+       url("../fonts/et-book/et-book-roman-line-figures/et-book-roman-line-figures.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ============================================
+   EB Garamond - Variable Fonts
+   - Fallback for extended Latin characters
+   ============================================ */
+
+/* EB Garamond Variable - Regular */
+@font-face {
+  font-family: "EB Garamond";
+  src: url("../fonts/EB_Garamond/EBGaramond-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* EB Garamond Variable - Italic */
+@font-face {
+  font-family: "EB Garamond";
+  src: url("../fonts/EB_Garamond/EBGaramond-Italic-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================
+   霞鹜 (Lxgw) CJK Font Family
+   ============================================ */
+
+/* 霞鹜新致宋 - 正文 CJK */
+@font-face {
+  font-family: "LXGWNeoZhiSong";
+  src: url("../fonts/Lxgw/LxgwNeoZhiSong/LXGWNeoZhiSong.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 霞鹜文楷 - 引用 CJK */
+@font-face {
+  font-family: "LXGWWenKai";
+  src: url("../fonts/Lxgw/LxgwWenKai/LXGWWenKai-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 霞鹜心致宋 - 斜体 CJK */
+@font-face {
+  font-family: "LXGWHeartSerifCL";
+  src: url("../fonts/Lxgw/LxgwHeartSerif/LXGWHeartSerifCL.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}

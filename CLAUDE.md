@@ -2,71 +2,63 @@
 
 ## Project Overview
 
-A modern blog with Tufte-inspired scientific typography. Core features include sidenotes, margin notes, optimal CJK typography, and Cloudflare R2 image hosting.
+A Tufte-inspired Astro **theme, distributed as an Astro integration** (`@laurenfrost/astro-tufte`).
+Core features: sidenotes, margin notes, CJK-aware typography, Cloudflare R2 image hosting.
+
+This repository is the theme package itself and is meant to stay public. The actual blog lives in a
+separate **private** repository that consumes this package as a git dependency, so content never
+enters this repo. `playground/` is a runnable example site used to develop and verify the theme.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
 | Framework | Astro 5.x (SSR mode via `@astrojs/cloudflare`) |
-| Deployment | Cloudflare Pages |
+| Deployment | Cloudflare Workers (`wrangler deploy`) |
 | Styling | Tailwind CSS 4.x + `@tailwindcss/typography` |
 | Typography | ET Book + EB Garamond + 霞鹜字体 (CJK) |
-| Content | Astro Content Layer API (MDX, glob loader) |
+| Content | Astro Content Layer API (MDX, glob loader), 由消费者仓库提供 |
 | Image Storage | Cloudflare R2 + Worker proxy |
 | Sync | Rclone (local posts to R2) |
+| Distribution | npm package / git dependency (Astro integration) |
 
 ## Project Structure
 
 ```
-/
-├── content/                       # 内容目录（与 src/ 解耦）
-│   └── posts/                     # 博客文章
-│       ├── hello-world/
-│       │   ├── index.mdx          # 文章正文
-│       │   └── hero.jpg           # 文章图片（与文章同目录）
-│       ├── test-text/
-│       │   └── index.mdx
-│       └── gps-coord/
-│           └── index.mdx
+/                                  # ← npm 包根目录（git 依赖要求 package.json 在仓库根）
+├── package.json                   # name/exports/files/peerDeps + workspaces: ["playground"]
+├── integration.mjs                # Astro integration 入口
+├── virtual.d.ts                   # virtual:astro-tufte/config 的类型声明
 ├── src/
-│   ├── content.config.ts          # Content Layer API 配置（glob loader）
-│   ├── components/
-│   │   ├── Header.astro           # Site header with navigation
-│   │   ├── Footer.astro           # Site footer with credits
-│   │   ├── Sidenote.astro         # Numbered sidenotes with CSS toggle
-│   │   ├── Marginnote.astro       # Unnumbered margin notes
-│   │   ├── Figure.astro           # Images with caption/credit (normal / fullwidth / bleed)
-│   │   ├── MarginFigure.astro     # Small images in margin area
-│   │   ├── Blockquote.astro       # Quotes with author/source
-│   │   └── Fullwidth.astro        # Full-width content wrapper
-│   ├── layouts/
-│   │   └── BaseLayout.astro       # Tufte-style base layout
-│   ├── pages/
-│   │   ├── index.astro            # Homepage with post listing (wide mode)
-│   │   ├── archive.astro          # 文章归档页 (wide mode)
-│   │   ├── links.astro            # 友链页 (wide mode)
-│   │   ├── about.astro            # 关于页 (wide mode)
-│   │   └── posts/[...slug].astro  # Dynamic post pages (with sidenotes)
+│   ├── components/                # Sidenote / MarginNote / Figure / MarginFigure /
+│   │                              #   Blockquote / Cite / Fullwidth / Ruby / Header / Footer
+│   ├── layouts/BaseLayout.astro    # Tufte 栅格 + <head>
+│   ├── pages/                     # 被 injectRoute 注入的路由
+│   │   ├── index.astro
+│   │   ├── archive.astro
+│   │   ├── links.astro
+│   │   └── posts/[...slug].astro
 │   ├── plugins/
-│   │   ├── remark-image-assets.ts # Image path transformation (dev/build)
-│   │   └── shiki-meta-transformer.ts # Code block meta string parser (wrap, lineno, hl_lines, linenostart)
-│   └── styles/
-│       └── global.css             # @font-face, @theme, base styles
-├── public/
-│   └── fonts/                     # 字体文件
-│       ├── et-book/               # ET Book 各字形
-│       ├── EB_Garamond/           # EB Garamond 可变字体
-│       └── Lxgw/                  # 霞鹜 CJK 字体
-├── worker/                        # R2 image proxy Worker
-│   ├── src/index.ts
-│   ├── wrangler.toml
-│   └── package.json
-├── astro.config.mjs               # Astro + Cloudflare + Remark + Vite 中间件
-├── tsconfig.json                  # Path aliases (@components/*)
-├── rclone.conf.example            # R2 sync template
-└── package.json
+│   │   ├── remark-image-assets.mjs    # 图片路径改写（dev/build）
+│   │   └── shiki-meta-transformer.mjs # 代码块 meta string 解析
+│   ├── schema.mjs                 # postSchema + generatePostId（消费者的 content.config.ts 用）
+│   ├── styles/
+│   │   ├── fonts.css              # 仅 @font-face，相对 url()，由 BaseLayout 直接 import
+│   │   └── theme.css              # @theme / @plugin / 基础样式，由消费者的 Tailwind 入口 import
+│   └── fonts/                     # ET Book / EB Garamond / 霞鹜，Vite 打包成 _astro 资源
+├── worker/                        # R2 图床代理 Worker（独立部署）
+└── playground/                    # 示例站点（file:.. 引用主题）
+    ├── astro.config.mjs
+    ├── src/content.config.ts
+    ├── src/styles/site.css
+    ├── src/pages/about.astro
+    └── content/posts/<slug>/index.mdx
+
+private-blog/                      # 私有博客仓库的脚手架（.gitignore，待移出）
 ```
+
+消费者（私有仓库）只需要四样东西：`astro.config.mjs`、`src/content.config.ts`、
+`src/styles/site.css`、`content/posts/`。
 
 ## Architecture Decisions
 
@@ -77,45 +69,52 @@ Using `output: 'server'` with `@astrojs/cloudflare`. This enables:
 - Edge rendering for optimal global performance
 - Direct access to Cloudflare bindings (R2, KV, etc.)
 
-### 2. Content Layer API with Glob Loader
+### 2. 分发方式：Astro Integration
 
-使用 Astro 5 Content Layer API (`src/content.config.ts`)，通过 `glob` loader 从 `content/posts/` 加载文章。
+主题通过 `integration.mjs` 的 `astro:config:setup` 钩子接管一切：
 
-**核心设计：**
-- 内容目录 `content/` 与代码目录 `src/` 完全解耦
-- 每篇文章一个目录：`content/posts/<slug>/index.mdx`
-- 图片与文章同目录存放，方便写作管理
-- MDX 中通过 `@components/` 路径别名引用组件（tsconfig paths）
-- Content Layer 使用 `post.id` 而非 `post.slug` 标识文章
+- `injectRoute` 注入 `/`、`/archive`、`/links`、`/posts/[...slug]`，entrypoint 用包名路径
+  （`@laurenfrost/astro-tufte/pages/index.astro`），所以这些文件必须出现在 package.json 的 `exports` 里
+- `injectScript('page-ssr', 'import "<consumer>/src/styles/site.css"')` 注入 Tailwind 入口
+  （老版 `@astrojs/tailwind` 就是这么做的）
+- `updateConfig` 注册 `@astrojs/mdx`、`@tailwindcss/vite`、remark/rehype/Shiki 配置
+- 一个 Vite 插件把站点配置暴露成虚拟模块 `virtual:astro-tufte/config`，组件用
+  `import { site } from 'virtual:astro-tufte/config'` 读取
+- `vite.ssr.noExternal: ['@laurenfrost/astro-tufte']` —— 必须，否则 node_modules 里的 `.astro`
+  会被 externalize，SSR 时报 `Unknown file extension '.astro'`
 
-**Schema** (`src/content.config.ts`):
-```typescript
-import { defineCollection, z } from 'astro:content';
+**踩过的坑（改动时注意）：**
+
+| 坑 | 处理 |
+|----|------|
+| SSR externalize `.astro` | integration 里加 `vite.ssr.noExternal` |
+| Tailwind 不扫 node_modules | 主题只用 `prose prose-lg max-w-none` 三个工具类，theme.css 里用 `@source inline(...)` 安全列表；其余样式一律写成普通 CSS / scoped style |
+| `src/content.config.ts` 位置固定 | 注入不了，消费者自己写，schema 从 `@laurenfrost/astro-tufte/schema` 导入 |
+| config 期执行的代码 | `integration.mjs` 和两个插件都是 `.mjs` + JSDoc，**不要改回 `.ts`**，否则被 externalize 后 Node 直接跑 TS |
+| `public/` 注入不了 | 字体改走 `src/fonts/` + fonts.css 里的相对 `url()`，Vite 打包；favicon 归消费者 |
+
+**Content Layer**（消费者侧）：
+
+```ts
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { postSchema, generatePostId } from '@laurenfrost/astro-tufte/schema';
 
-const posts = defineCollection({
-  loader: glob({
-    pattern: '**/index.mdx',
-    base: './content/posts',
-    generateId: ({ entry }) => entry.replace(/\/index\.mdx$/, ''),
+export const collections = {
+  posts: defineCollection({
+    loader: glob({ pattern: '**/index.mdx', base: './content/posts', generateId: generatePostId }),
+    schema: postSchema,
   }),
-  schema: z.object({
-    title: z.string(),
-    subtitle: z.string().optional(),
-    date: z.coerce.date(),
-    draft: z.boolean().default(false),
-    tags: z.array(z.string()).optional(),
-    description: z.string().optional(),
-    math: z.boolean().default(false),
-  }),
-});
+};
 ```
 
-**路径别名：**
-MDX 文件位于 `content/` 目录外，通过 tsconfig `@components/*` → `src/components/*` 别名引用组件：
+MDX 里通过包路径引用组件（**不是** `@components/` 别名，那个已经废弃）：
+
 ```mdx
-import Sidenote from '@components/Sidenote.astro';
+import Sidenote from '@laurenfrost/astro-tufte/components/Sidenote.astro';
 ```
+
+Content Layer 使用 `post.id` 而非 `post.slug` 标识文章。
 
 ### 3. Image Pipeline
 
@@ -251,18 +250,19 @@ Mobile: Single column, sidenotes collapse into expandable inline elements (CSS c
 
 ### Tailwind CSS
 
-- Use Tailwind utility classes directly; avoid `@apply` except for prose customization
-- Tufte color palette (matching official Tufte CSS):
-  ```javascript
-  colors: {
-    tufte: {
-      bg: '#fffff8',     // Cream paper background
-      text: '#111',      // Near-black body text
-    }
+- **主题组件里不要用 Tailwind 工具类**：Tailwind 默认不扫描 node_modules，包里的工具类
+  在消费者项目中会被 purge 掉。用组件的 scoped `<style>` 或 `src/styles/theme.css`。
+  唯一的例外是文章正文的 `prose prose-lg max-w-none`，已在 theme.css 里用
+  `@source inline(...)` 安全列表兜住。
+- 设计 token 定义在 `src/styles/theme.css` 的 `@theme` 块里（Tufte 官方色）：
+  ```css
+  @theme {
+    --color-tufte-bg: #fffff8;   /* Cream paper background */
+    --color-tufte-text: #111;    /* Near-black body text */
   }
   ```
 - Links: inherit text color, distinguished by underline only (Tufte canonical style)
-- Typography plugin customization via `prose-tufte` variant
+- 消费者的 Tailwind 入口是自己的 `src/styles/site.css`，由 integration 注入
 
 ### Typography & Font Configuration
 
@@ -274,9 +274,10 @@ Mobile: Single column, sidenotes collapse into expandable inline elements (CSS c
 | 斜体 | ET Book Italic → EB Garamond Italic | 霞鹜心致宋 | `--font-serif-italic` |
 | 引用 | ET Book → EB Garamond | 霞鹜文楷 | `--font-serif-quote` |
 
-**字体文件结构：**
+**字体文件结构**（在包内，由 `src/styles/fonts.css` 用相对 `url()` 引用，Vite 打包成 `_astro` 资源；
+消费者不需要往自己的 `public/` 放任何字体）：
 ```
-public/fonts/
+src/fonts/
 ├── et-book/
 │   ├── et-book-roman-old-style-figures/     # 正文 (old-style 数字)
 │   ├── et-book-display-italic-old-style-figures/  # 斜体
@@ -321,40 +322,37 @@ public/fonts/
 ## Development Commands
 
 ```bash
-# Install dependencies
-npm install
-
-# Development server (images served from local content/posts/)
-npm run dev
-
-# Production build (images point to CDN)
+# 主题仓库（本仓库）
+npm install            # 安装主题依赖 + playground（npm workspace，file:.. 软链）
+npm run dev            # 起 playground，改主题源码即时生效
 npm run build
+npm run deploy:worker  # 部署 R2 图床 Worker
 
-# Preview production build locally
-npm run preview
-
-# Sync post images to R2 (preserves directory structure)
-rclone sync content/posts r2:blog-images --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" --config rclone.conf
-
-# Deploy Worker
-cd worker && npx wrangler deploy
+# 私有博客仓库
+npm run dev
+npm run deploy         # astro build && wrangler deploy
+npm run sync:images    # rclone sync content/posts r2:blog-images
 ```
+
+发版：主题仓库打 tag（`git tag v0.1.0 && git push --tags`），私有仓库把
+`"@laurenfrost/astro-tufte": "github:Laurenfrost/tufte-like-astro-blog#v0.1.0"` 的版本号改掉再 `npm install`。
 
 ## Key Files Reference
 
-When modifying these files, understand their role:
-
 | File | Purpose |
 |------|---------|
-| `astro.config.mjs` | Astro config, Cloudflare adapter, Remark plugins, Vite dev middleware |
-| `src/content.config.ts` | Content Layer API schema + glob loader |
-| `tsconfig.json` | Path aliases (`@components/*` → `src/components/*`) |
-| `src/layouts/BaseLayout.astro` | Master layout with Tufte grid |
-| `src/plugins/remark-image-assets.ts` | Image path transformation (dev: local, build: CDN) |
-| `src/plugins/shiki-meta-transformer.ts` | Shiki transformer: opt-in wrap, line numbers, highlights via meta string |
-| `src/components/Sidenote.astro` | Core interactive component |
-| `worker/src/index.ts` | R2 image proxy + Image Transformations (Mode A) |
-| `worker/wrangler.toml` | Worker config: R2 binding (`R2_BUCKET`) + Images binding (`IMAGES`) |
+| `integration.mjs` | Integration 入口：路由注入、CSS 注入、Markdown/Vite 配置、`DEFAULT_SITE` 站点配置默认值 |
+| `package.json` | `exports` map —— 新增任何需要被消费者引用的文件都要在这里登记 |
+| `virtual.d.ts` | `virtual:astro-tufte/config` 类型；改 `DEFAULT_SITE` 时同步更新 |
+| `src/layouts/BaseLayout.astro` | Tufte 栅格、`<head>`、fonts.css 的唯一入口 |
+| `src/styles/theme.css` | 设计 token、基础样式、prose 覆盖（需要 Tailwind 处理） |
+| `src/styles/fonts.css` | 纯 @font-face，相对 url()，不含 Tailwind 指令 |
+| `src/plugins/remark-image-assets.mjs` | 图片路径改写（dev：本地中间件；build：CDN） |
+| `src/plugins/shiki-meta-transformer.mjs` | Shiki transformer：wrap / 行号 / 高亮 |
+| `src/schema.mjs` | 文章 frontmatter schema（用 `astro/zod`，不用 `astro:content`） |
+| `src/components/Sidenote.astro` | 核心交互组件 |
+| `worker/src/index.ts` | R2 图床代理 + Image Transformations（模式 A） |
+| `playground/astro.config.mjs` | 消费者用法的参考实现 |
 
 ## Implementation Progress
 
@@ -405,7 +403,7 @@ When modifying these files, understand their role:
   - `linenostart=N` — 行号起始值
   - `hl_lines=["2-5","8"]` — 高亮指定行（支持范围）
 - 行内高亮: `// [!code highlight]`（transformerNotationHighlight）
-- 自定义 Shiki transformer: `src/plugins/shiki-meta-transformer.ts`
+- 自定义 Shiki transformer: `src/plugins/shiki-meta-transformer.mjs`
 
 ## Notes for AI Assistants
 
@@ -414,6 +412,13 @@ When modifying these files, understand their role:
 - Keep solutions minimal; avoid unnecessary abstraction
 - Test responsive behavior for all layout changes
 - Consider CJK text rendering in typography decisions
+- **本仓库是 npm 包，不是应用**：改动后用 `npm run dev` / `npm run build` 跑 playground 验证
+- 新增导出文件（组件、页面、样式）必须同步加到 `package.json` 的 `exports`
+- 新增被注入的路由要同时改 `integration.mjs` 的 `injectRoute` 和 `routes` 开关
+- 站点相关的可配置项放进 `DEFAULT_SITE`，不要硬编码在组件里；同步更新 `virtual.d.ts`
+- 主题内**避免使用 Tailwind 工具类**（Tailwind 不扫 node_modules）；用 scoped `<style>` 或 theme.css
+- `integration.mjs` 与 `src/plugins/*` 保持 `.mjs`（config 期执行，不能是 TS）
 - Image paths in MDX should use relative `./` syntax (transformed at build time by remark plugin)
-- MDX component imports use `@components/` alias, NOT relative paths
+- MDX component imports use `@laurenfrost/astro-tufte/components/*.astro`
 - Content Layer API uses `post.id` (not `post.slug`) for article identification
+- 私有内容绝不进本仓库；`private-blog/` 已被 gitignore
