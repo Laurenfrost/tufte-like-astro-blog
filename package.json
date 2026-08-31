@@ -30,6 +30,7 @@
   "files": [
     "integration.mjs",
     "src",
+    "worker",
     "virtual.d.ts"
   ],
   "types": "./virtual.d.ts",

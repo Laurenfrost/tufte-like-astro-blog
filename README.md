@@ -125,14 +125,38 @@ content/posts/<slug>/hero.jpg
                   ↑ rclone sync 到 R2，由 worker/ 里的 Worker 代理 + Images Binding 转格式
 ```
 
-MDX 里始终写相对路径 `![alt](./hero.jpg)`，remark 插件负责改写。
-
-同步图片与部署图床 Worker：
+MDX 里始终写相对路径 `![alt](./hero.jpg)`，remark 插件负责改写。图片同步到 R2：
 
 ```bash
-rclone sync content/posts r2:blog-images --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" --config rclone.conf
-cd worker && npx wrangler deploy
+rclone sync content/posts r2:<bucket> --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" --config rclone.conf
 ```
+
+### 图床 Worker
+
+`worker/src/index.ts` 从 R2 取图，按 `Accept` 头选 AVIF / WebP / 原格式，走 Images Binding
+转换并用 Cache API 缓存。**源码只有这一份**——消费者不要复制，只在自己仓库里放一份部署配置，
+把 `main` 指向 node_modules 里的源码：
+
+```jsonc
+// <blog>/worker/wrangler.jsonc
+{
+  "main": "../node_modules/@laurenfrost/astro-tufte/worker/src/index.ts",
+  "name": "my-blog-image",
+  "compatibility_date": "2024-01-01",
+  "r2_buckets": [{ "binding": "R2_BUCKET", "bucket_name": "my-bucket" }],
+  "images": { "binding": "IMAGES" }
+}
+```
+
+```bash
+wrangler deploy --config worker/wrangler.jsonc
+```
+
+把部署后的 `https://<name>.<subdomain>.workers.dev` 填进站点的 `IMAGE_BASE_URL` 即可。
+
+R2 bucket 绑上自定义域名之后，这个 Worker 就可以整个不要了：设
+`IMAGE_TRANSFORM_OPTIONS=format=auto,quality=80`，主题会改写成 `/cdn-cgi/image/` 的 URL，
+由 Cloudflare 边缘直接变换（模式 B）。
 
 ## 本仓库的开发
 
@@ -145,6 +169,11 @@ npm run build
 ```
 
 改主题源码后 playground 会热更新。
+
+CI（`.github/workflows/ci.yaml`）在 push 和 PR 上构建 playground——它是本仓库里唯一的消费者，
+组件、路由、`exports` map 出问题都会在这里露出来。master 上如果配了 `CLOUDFLARE_API_TOKEN`
+和 `CLOUDFLARE_ACCOUNT_ID`，还会把 playground 部署成 demo 站；没配就只跑构建，不会失败。
+仓库变量 `IMAGE_BASE_URL` 指向 playground 自己的图床 Worker。
 
 ```
 /

@@ -1,3 +1,8 @@
+# Deployment config for THIS repo's own image host (the playground demo).
+# A blog consuming the theme keeps its own copy of this file and points `main`
+# at the source inside node_modules — see the README — so there is only ever
+# one copy of src/index.ts.
+
 name = "tufte-style-blog-image"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
@@ -11,7 +16,7 @@ bucket_name = "tufte-style-blog-test"
 [images]
 binding = "IMAGES"
 
-# Custom domain (configure in Cloudflare dashboard)
-# routes = [
-#   { pattern = "img.yourdomain.com", custom_domain = true }
-# ]
+# Once the bucket is behind a custom domain you can drop this Worker entirely
+# and switch the theme to Mode B by setting
+#   IMAGE_TRANSFORM_OPTIONS=format=auto,quality=80
+# which rewrites image URLs through /cdn-cgi/image/ instead.
