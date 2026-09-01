@@ -15,7 +15,7 @@ npm i github:Laurenfrost/tufte-like-astro-blog#v0.3.0
 
 ## 使用
 
-消费者项目需要三个文件。
+消费者项目需要四个文件。
 
 **`astro.config.mjs`**
 
@@ -46,6 +46,14 @@ export default defineConfig({
 ```css
 @import "tailwindcss";
 @import "@laurenfrost/astro-tufte/theme.css";
+```
+
+**`public/_headers`** —— Workers Assets 默认给所有资源发 `max-age=0, must-revalidate`，
+而 `/_astro/` 下的文件名都带内容哈希，每次导航都回源验证是纯浪费（字体样式表就有 188KB）：
+
+```
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
 ```
 
 **`src/content.config.ts`** —— Astro 5 只认这个固定位置，integration 注入不了：
