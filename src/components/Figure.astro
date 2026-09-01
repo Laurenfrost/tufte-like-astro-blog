@@ -4,27 +4,40 @@ interface Props {
   alt: string;
   caption?: string;
   credit?: string;
+  /** 出处链接：给 credit 套一个外链，用于标注图片来源 */
+  creditUrl?: string;
   fullwidth?: boolean;
   /** 出血：突破 tufte-container，向视口两侧扩展，比 fullwidth 更宽 */
   bleed?: boolean;
 }
 
-const { src, alt, caption, credit, fullwidth = false, bleed = false } = Astro.props;
+const { src, alt, caption, credit, creditUrl, fullwidth = false, bleed = false } = Astro.props;
 
 // bleed 与 fullwidth 共用「图下居中说明」的排版
 const belowCaption = fullwidth || bleed;
+
+// credit 紧跟在 caption 后面，两者都有时用逗号分隔
+const creditSeparator = credit && caption ? ', ' : '';
 ---
 
 <figure class:list={["tufte-figure", { fullwidth, bleed }]}>
   {(caption || credit) && !belowCaption && (
     <figcaption class="margin-caption">
-      {caption}<span class="credit">{credit && (caption ? `, ${credit}` : credit)}</span>
+      {caption}{credit && (
+        <span class="credit">{creditSeparator}{creditUrl
+          ? <a href={creditUrl} target="_blank" rel="noopener noreferrer">{credit}</a>
+          : credit}</span>
+      )}
     </figcaption>
   )}
   <img src={src} alt={alt} loading="lazy" />
   {(caption || credit) && belowCaption && (
     <figcaption class="below-caption">
-      {caption}<span class="credit">{credit && (caption ? `, ${credit}` : credit)}</span>
+      {caption}{credit && (
+        <span class="credit">{creditSeparator}{creditUrl
+          ? <a href={creditUrl} target="_blank" rel="noopener noreferrer">{credit}</a>
+          : credit}</span>
+      )}
     </figcaption>
   )}
 </figure>
@@ -44,6 +57,11 @@ const belowCaption = fullwidth || bleed;
 
   .tufte-figure .credit {
     color: #777;
+  }
+
+  .tufte-figure .credit a {
+    color: inherit;
+    text-decoration-thickness: 0.5px;
   }
 
   /* Margin caption: floats to right margin, aligns with image top */

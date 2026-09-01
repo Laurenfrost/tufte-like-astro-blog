@@ -221,6 +221,10 @@ Build 模式 → Remark 插件 → https://img.domain.com/cdn-cgi/image/format=a
 | 全宽 | `<Figure fullwidth />` | 容器内容宽（≥1400px 时 1000px），说明文字居中于图下 | 宽表格、多面板图 |
 | 出血 | `<Figure bleed />` | 视口宽（左右各留 2rem），图片最大 1400px | 需要突破容器的大图 |
 
+说明文字由 `caption` + `credit` 两段组成，两者都有时用逗号连接，`credit` 用更浅的灰色。
+`creditUrl` 会把 `credit` 包成新窗口打开的外链（继承灰度、下划线压细），用来标注图片来源。
+`MarginFigure` 支持同样的 `caption` / `credit` / `creditUrl`。
+
 `fullwidth` 与 `bleed` 都靠「正文内容盒的左边缘 = 容器内容盒的左边缘」来定位：
 `margin-left` 保持 0（fullwidth）或按 `(容器内容宽 − 100vw) / 2` 计算（bleed）。
 注意容器的 `padding: 0 4%` 是相对**视口**解析的，不是相对它自己的 `max-width`，

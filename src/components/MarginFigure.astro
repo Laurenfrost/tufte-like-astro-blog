@@ -4,9 +4,15 @@ interface Props {
   src: string;
   alt: string;
   caption?: string;
+  credit?: string;
+  /** 出处链接：给 credit 套一个外链，用于标注图片来源 */
+  creditUrl?: string;
 }
 
-const { id, src, alt, caption } = Astro.props;
+const { id, src, alt, caption, credit, creditUrl } = Astro.props;
+
+// credit 紧跟在 caption 后面，两者都有时用逗号分隔
+const creditSeparator = credit && caption ? ', ' : '';
 ---
 
 <span class="marginfigure-wrapper">
@@ -14,13 +20,28 @@ const { id, src, alt, caption } = Astro.props;
   <input type="checkbox" id={`mf-${id}`} class="marginfigure-toggle" />
   <span class="marginfigure" role="figure">
     <img src={src} alt={alt} loading="lazy" />
-    {caption && <span class="caption">{caption}</span>}
+    {(caption || credit) && (
+      <span class="caption">{caption}{credit && (
+        <span class="credit">{creditSeparator}{creditUrl
+          ? <a href={creditUrl} target="_blank" rel="noopener noreferrer">{credit}</a>
+          : credit}</span>
+      )}</span>
+    )}
   </span>
 </span>
 
 <style>
   .marginfigure-wrapper {
     position: relative;
+  }
+
+  .marginfigure .credit {
+    color: #777;
+  }
+
+  .marginfigure .credit a {
+    color: inherit;
+    text-decoration-thickness: 0.5px;
   }
 
   .marginfigure-toggle {
