@@ -128,7 +128,7 @@ content/posts/<slug>/hero.jpg
 MDX 里始终写相对路径 `![alt](./hero.jpg)`，remark 插件负责改写。图片同步到 R2：
 
 ```bash
-rclone sync content/posts r2:<bucket> --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" --config rclone.conf
+rclone sync content/posts r2:<bucket>/posts --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" --config rclone.conf
 ```
 
 ### 图床 Worker

@@ -15,5 +15,7 @@ endpoint = https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
 acl = private
 
 # Usage:
-# Sync all post images to R2 (preserves post directory structure):
-# rclone sync content/posts r2:blog-images --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" --config rclone.conf
+# Sync all post images to R2. The destination prefix must be `posts/`: the theme
+# rewrites images to <baseUrl>/posts/<slug>/<file>, and the Worker looks that path
+# up in the bucket verbatim.
+# rclone sync content/posts r2:blog-images/posts --include "*.{jpg,jpeg,png,gif,webp,avif,svg}" --config rclone.conf

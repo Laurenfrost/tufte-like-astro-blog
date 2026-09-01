@@ -332,7 +332,7 @@ npm run deploy:worker  # 部署 R2 图床 Worker
 # 私有博客仓库
 npm run dev
 npm run deploy         # astro build && wrangler deploy
-npm run sync:images    # rclone sync content/posts r2:blog-images
+npm run sync:images    # rclone sync content/posts r2:blog-images/posts
 ```
 
 发版：主题仓库打 tag（`git tag v0.1.0 && git push --tags`），私有仓库把
