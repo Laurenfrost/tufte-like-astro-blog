@@ -1,6 +1,22 @@
+/* ============================================
+   Font loading
+
+   Latin faces ship whole as WOFF2 — they are small, and EB Garamond has to
+   keep its `wght` variation axis.
+
+   The CJK families are far too large to send as one file (LXGWWenKai alone is
+   24MB as TTF), so each is split into unicode-range slices by cn-font-split.
+   A page then downloads only the slices covering the characters it actually
+   renders — a few tens of KB — instead of the whole font. Those stylesheets
+   are generated; regenerate them with tools/build-fonts.sh rather than editing.
+   ============================================ */
+
+@import "../fonts/Lxgw/LxgwNeoZhiSong/index.css";
+@import "../fonts/Lxgw/LxgwWenKai/index.css";
+@import "../fonts/Lxgw/LxgwHeartSerif/index.css";
 
 /* ============================================
-   ET Book Font Family
+   ET Book
    - Old-style figures for body text (traditional look)
    - Line figures available for tabular data
    ============================================ */
@@ -8,8 +24,7 @@
 /* ET Book Roman - Old Style Figures (正文) */
 @font-face {
   font-family: "ET Book";
-  src: url("../fonts/et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.woff") format("woff"),
-       url("../fonts/et-book/et-book-roman-old-style-figures/et-book-roman-old-style-figures.ttf") format("truetype");
+  src: url("../fonts/et-book/et-book-roman-old-style-figures.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -18,8 +33,7 @@
 /* ET Book Display Italic - Old Style Figures (斜体) */
 @font-face {
   font-family: "ET Book";
-  src: url("../fonts/et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.woff") format("woff"),
-       url("../fonts/et-book/et-book-display-italic-old-style-figures/et-book-display-italic-old-style-figures.ttf") format("truetype");
+  src: url("../fonts/et-book/et-book-display-italic-old-style-figures.woff2") format("woff2");
   font-weight: normal;
   font-style: italic;
   font-display: swap;
@@ -28,8 +42,7 @@
 /* ET Book Semi Bold - Old Style Figures (半粗体) */
 @font-face {
   font-family: "ET Book";
-  src: url("../fonts/et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.woff") format("woff"),
-       url("../fonts/et-book/et-book-semi-bold-old-style-figures/et-book-semi-bold-old-style-figures.ttf") format("truetype");
+  src: url("../fonts/et-book/et-book-semi-bold-old-style-figures.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -38,8 +51,7 @@
 /* ET Book Bold - Line Figures (粗体) */
 @font-face {
   font-family: "ET Book";
-  src: url("../fonts/et-book/et-book-bold-line-figures/et-book-bold-line-figures.woff") format("woff"),
-       url("../fonts/et-book/et-book-bold-line-figures/et-book-bold-line-figures.ttf") format("truetype");
+  src: url("../fonts/et-book/et-book-bold-line-figures.woff2") format("woff2");
   font-weight: bold;
   font-style: normal;
   font-display: swap;
@@ -48,8 +60,7 @@
 /* ET Book Roman - Line Figures (等高数字，用于表格等) */
 @font-face {
   font-family: "ET Book Lining";
-  src: url("../fonts/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff") format("woff"),
-       url("../fonts/et-book/et-book-roman-line-figures/et-book-roman-line-figures.ttf") format("truetype");
+  src: url("../fonts/et-book/et-book-roman-line-figures.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -63,7 +74,7 @@
 /* EB Garamond Variable - Regular */
 @font-face {
   font-family: "EB Garamond";
-  src: url("../fonts/EB_Garamond/EBGaramond-VariableFont_wght.ttf") format("truetype-variations");
+  src: url("../fonts/EB_Garamond/EBGaramond-VariableFont_wght.woff2") format("woff2-variations");
   font-weight: 400 800;
   font-style: normal;
   font-display: swap;
@@ -72,39 +83,8 @@
 /* EB Garamond Variable - Italic */
 @font-face {
   font-family: "EB Garamond";
-  src: url("../fonts/EB_Garamond/EBGaramond-Italic-VariableFont_wght.ttf") format("truetype-variations");
+  src: url("../fonts/EB_Garamond/EBGaramond-Italic-VariableFont_wght.woff2") format("woff2-variations");
   font-weight: 400 800;
   font-style: italic;
-  font-display: swap;
-}
-
-/* ============================================
-   霞鹜 (Lxgw) CJK Font Family
-   ============================================ */
-
-/* 霞鹜新致宋 - 正文 CJK */
-@font-face {
-  font-family: "LXGWNeoZhiSong";
-  src: url("../fonts/Lxgw/LxgwNeoZhiSong/LXGWNeoZhiSong.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* 霞鹜文楷 - 引用 CJK */
-@font-face {
-  font-family: "LXGWWenKai";
-  src: url("../fonts/Lxgw/LxgwWenKai/LXGWWenKai-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* 霞鹜心致宋 - 斜体 CJK */
-@font-face {
-  font-family: "LXGWHeartSerifCL";
-  src: url("../fonts/Lxgw/LxgwHeartSerif/LXGWHeartSerifCL.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
   font-display: swap;
 }

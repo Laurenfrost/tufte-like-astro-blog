@@ -10,7 +10,7 @@ Tufte 风格的 Astro 主题：边注（sidenote）、旁注（margin note）、
 
 ```bash
 npm i astro @astrojs/cloudflare tailwindcss
-npm i github:Laurenfrost/tufte-like-astro-blog#v0.2.0
+npm i github:Laurenfrost/tufte-like-astro-blog#v0.3.0
 ```
 
 ## 使用
@@ -191,6 +191,11 @@ CI（`.github/workflows/ci.yaml`）在 push 和 PR 上构建 playground——它
 ```
 
 字体走 Vite 资源打包（`src/styles/fonts.css` 里的相对 `url()`），消费者不需要往 `public/` 里放任何字体文件。
+
+拉丁字体整体转成 WOFF2；三个霞鹜 CJK 字体按 unicode-range 切成小片，页面只下载它实际渲染到的
+那几片（单片平均 30KB），而不是无条件拉整个字体——LXGWWenKai 原来是 24MB 的 TTF。
+`src/fonts/Lxgw/*/index.css` 是生成产物，不要手改；原始 TTF 不入库，要重新生成用
+`./tools/build-fonts.sh <放原始 ttf 的目录>`。
 
 ## License
 

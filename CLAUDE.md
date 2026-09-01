@@ -45,7 +45,8 @@ enters this repo. `playground/` is a runnable example site used to develop and v
 │   ├── styles/
 │   │   ├── fonts.css              # 仅 @font-face，相对 url()，由 BaseLayout 直接 import
 │   │   └── theme.css              # @theme / @plugin / 基础样式，由消费者的 Tailwind 入口 import
-│   └── fonts/                     # ET Book / EB Garamond / 霞鹜，Vite 打包成 _astro 资源
+│   └── fonts/                     # ET Book / EB Garamond（WOFF2）+ 霞鹜（unicode-range 分片）
+├── tools/build-fonts.sh           # 从原始 TTF 重新生成 src/fonts（原始文件不入库）
 ├── worker/                        # R2 图床代理 Worker（独立部署）
 └── playground/                    # 示例站点（file:.. 引用主题）
     ├── astro.config.mjs
@@ -347,7 +348,8 @@ npm run sync:images    # rclone sync content/posts r2:blog-images/posts
 | `virtual.d.ts` | `virtual:astro-tufte/config` 类型；改 `DEFAULT_SITE` 时同步更新 |
 | `src/layouts/BaseLayout.astro` | Tufte 栅格、`<head>`、fonts.css 的唯一入口 |
 | `src/styles/theme.css` | 设计 token、基础样式、prose 覆盖（需要 Tailwind 处理） |
-| `src/styles/fonts.css` | 纯 @font-face，相对 url()，不含 Tailwind 指令 |
+| `src/styles/fonts.css` | 纯 @font-face，相对 url()，不含 Tailwind 指令；CJK 部分 @import 生成的分片 CSS |
+| `src/fonts/Lxgw/*/index.css` | cn-font-split 生成的分片样式表，**不要手改** |
 | `src/plugins/remark-image-assets.mjs` | 图片路径改写（dev：本地中间件；build：CDN） |
 | `src/plugins/shiki-meta-transformer.mjs` | Shiki transformer：wrap / 行号 / 高亮 |
 | `src/schema.mjs` | 文章 frontmatter schema（用 `astro/zod`，不用 `astro:content`） |
